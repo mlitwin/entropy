@@ -23,11 +23,11 @@ import (
 	"states"
 )
 
-const N = 20
-const M = 40
+const space = 20
+const speeds = 40
 
-const distM = 10
-const distN = 50
+const resolution = 10
+const precision = 50
 
 func timespeed(a int, b int) int {
 	if a < b {
@@ -40,12 +40,12 @@ func timespeed(a int, b int) int {
 }
 
 func main() {
-	u := states.MakeUniverse(N, M)
+	u := states.MakeUniverse(space, speeds)
 	//den := states.MakeDistribution(10, 50)
-	den := states.MakeDistributionSet(distM, distN)
+	den := states.MakeDistributionSet(resolution, precision)
 	//fmt.Println(ds)
 
-	for t := 0; t < N; t++ {
+	for t := 0; t < space; t++ {
 		d := u.Density()
 		den.Inc(d[:], 1)
 		//fmt.Println(p, d)
@@ -53,9 +53,9 @@ func main() {
 		u.Advance()
 	}
 
-	var tv = states.NewMatrix[int](distM, distN)
+	var tv = states.NewMatrix[int](resolution, precision)
 
-	for t := 0; t < N; t++ {
+	for t := 0; t < space; t++ {
 		d := u.Density()
 		p := den.Val(d[:])
 		//fmt.Println(p, d)

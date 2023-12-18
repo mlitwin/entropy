@@ -16,8 +16,8 @@ func makeSubstate(s State, resolution int, sensitivity int) (sub State) {
 	for i := range sub {
 		t := 0
 		x := i * resolution
-		for x < (i+1)*resolution && x < len(s) {
-			t += s[x]
+		for x < (i+1)*resolution {
+			t += s[Mod(x, n)]
 			x++
 		}
 		sub[i] = t / sensitivity

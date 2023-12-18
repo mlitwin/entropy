@@ -20,14 +20,10 @@ He had to cross.
 
 import (
 	"fmt"
-
 	"states"
-	// 	"github.com/mlitwin/goeuler/arith"
-	// 	"github.com/mlitwin/goeuler/algo"
-	//  "github.com/mlitwin/goeuler/textutil"
 )
 
-const N = 10
+const N = 201
 const M = 40
 
 func timespeed(a int, b int) int {
@@ -42,28 +38,40 @@ func timespeed(a int, b int) int {
 
 func main() {
 	u := states.MakeUniverse(N, M)
-	den := states.MakeDistribution(5, 5)
+	//den := states.MakeDistribution(10, 50)
+	den := states.MakeDistributionSet(10, 50)
+	//fmt.Println(ds)
 
 	for t := 0; t < N; t++ {
 		d := u.Density()
-		p := den.Inc(d[:], 1)
-		fmt.Println(p, d)
+		den.Inc(d[:], 1)
+		//fmt.Println(p, d)
 
 		u.Advance()
 	}
 
-	tv := 0
+	var tv = states.NewMatrix[int](M, N)
 
 	for t := 0; t < N; t++ {
 		d := u.Density()
 		p := den.Val(d[:])
-		fmt.Println(p, d)
+		//fmt.Println(p, d)
 
 		u.Advance()
 		d1 := u.Density()
-		tv += timespeed(p, den.Val(d1[:]))
+		p2 := den.Val(d1[:])
+		for x := 0; x < p.N(); x++ {
+			for v := 0; v < p.M(); v++ {
+				tv[v][x] = timespeed(p[v][x], p2[v][x])
+			}
+		}
 	}
 
-	fmt.Println(tv, den.D.ShannonEntropy())
+	//fmt.Println(tv, den.D.ShannonEntropy())
+	tv.ForEach(func(i int, j int, d int) {
+		if d != 0 {
+			fmt.Println(i, j, d)
+		}
+	})
 
 }

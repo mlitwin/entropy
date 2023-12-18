@@ -26,6 +26,9 @@ import (
 const N = 20
 const M = 40
 
+const distM = 10
+const distN = 50
+
 func timespeed(a int, b int) int {
 	if a < b {
 		return 1
@@ -39,7 +42,7 @@ func timespeed(a int, b int) int {
 func main() {
 	u := states.MakeUniverse(N, M)
 	//den := states.MakeDistribution(10, 50)
-	den := states.MakeDistributionSet(10, 50)
+	den := states.MakeDistributionSet(distM, distN)
 	//fmt.Println(ds)
 
 	for t := 0; t < N; t++ {
@@ -50,7 +53,7 @@ func main() {
 		u.Advance()
 	}
 
-	var tv = states.NewMatrix[int](M, N)
+	var tv = states.NewMatrix[int](distM, distN)
 
 	for t := 0; t < N; t++ {
 		d := u.Density()

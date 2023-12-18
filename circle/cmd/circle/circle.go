@@ -70,11 +70,15 @@ func main() {
 	}
 
 	//fmt.Println(tv, den.D.ShannonEntropy())
+	trend := 0
 	tv.ForEach(func(i int, j int) {
 		d := tv[i][j]
+		trend += d
 		if d != 0 {
 			fmt.Println(i, j, d)
 		}
 	})
+
+	fmt.Println("trend", trend)
 
 }

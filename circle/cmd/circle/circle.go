@@ -20,91 +20,15 @@ He had to cross.
 
 import (
 	"fmt"
-	"math/rand"
 
 	"states"
-
-	"github.com/mlitwin/goeuler/arith"
 	// 	"github.com/mlitwin/goeuler/arith"
 	// 	"github.com/mlitwin/goeuler/algo"
 	//  "github.com/mlitwin/goeuler/textutil"
 )
 
-const D = 3
 const N = 10
 const M = 40
-const plenum = 2
-const precision = 5
-
-type Matrix = arith.Matrix[int]
-type Vector = [N]int
-type Measurement = [D]int
-
-func mod(x int, n int) int {
-
-	return int((x%n + n) % n)
-}
-
-type Universe struct {
-	parity        int
-	particleCount int
-	genesis       Matrix
-	blue          Matrix
-	green         Matrix
-}
-
-func makeDarkMaterials(m *Matrix) (count int) {
-	for v := 0; v < M; v++ {
-		for x := 0; x < N; x++ {
-			n := rand.Intn(plenum)
-			(*m)[v][x] = n
-			count += n
-		}
-	}
-	return
-}
-
-func makeUniverse() *Universe {
-	universe := Universe{1, 0, arith.NewMatrix[int](M, N), arith.NewMatrix[int](M, N), arith.NewMatrix[int](M, N)}
-	universe.particleCount = makeDarkMaterials(&universe.genesis)
-	universe.blue = universe.genesis
-	return &universe
-}
-
-func (u *Universe) nowAndThen() (*Matrix, *Matrix) {
-	if u.parity == 1 {
-		return &u.blue, &u.green
-	} else {
-		return &u.green, &u.blue
-	}
-}
-
-func nextPosition(x, v int) int {
-	return mod(x+(v-M/2), N)
-}
-
-func (u *Universe) advance() {
-	now, then := u.nowAndThen()
-
-	for v := 0; v < M; v++ {
-		for x := 0; x < N; x++ {
-			x1 := nextPosition(x, v)
-			(*then)[v][x1] = (*now)[v][x]
-			(*now)[v][x] = 0
-		}
-	}
-	u.parity *= -1
-}
-
-func (u *Universe) density() (vec Vector) {
-	now, _ := u.nowAndThen()
-	for x := 0; x < N; x++ {
-		for v := 0; v < M; v++ {
-			vec[x] += (*now)[v][x]
-		}
-	}
-	return
-}
 
 func timespeed(a int, b int) int {
 	if a < b {
@@ -117,26 +41,26 @@ func timespeed(a int, b int) int {
 }
 
 func main() {
-	u := makeUniverse()
+	u := states.MakeUniverse(N, M)
 	den := states.MakeDistribution(5, 5)
 
 	for t := 0; t < N; t++ {
-		d := u.density()
+		d := u.Density()
 		p := den.Inc(d[:], 1)
 		fmt.Println(p, d)
 
-		u.advance()
+		u.Advance()
 	}
 
 	tv := 0
 
 	for t := 0; t < N; t++ {
-		d := u.density()
+		d := u.Density()
 		p := den.Val(d[:])
 		fmt.Println(p, d)
 
-		u.advance()
-		d1 := u.density()
+		u.Advance()
+		d1 := u.Density()
 		tv += timespeed(p, den.Val(d1[:]))
 	}
 

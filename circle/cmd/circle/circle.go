@@ -23,7 +23,7 @@ import (
 	"states"
 )
 
-const N = 201
+const N = 20
 const M = 40
 
 func timespeed(a int, b int) int {
@@ -60,15 +60,15 @@ func main() {
 		u.Advance()
 		d1 := u.Density()
 		p2 := den.Val(d1[:])
-		for x := 0; x < p.N(); x++ {
-			for v := 0; v < p.M(); v++ {
-				tv[v][x] = timespeed(p[v][x], p2[v][x])
-			}
-		}
+		tv.ForEach(func(i, j int) {
+			tv[i][j] = timespeed(p[i][j], p2[i][j])
+
+		})
 	}
 
 	//fmt.Println(tv, den.D.ShannonEntropy())
-	tv.ForEach(func(i int, j int, d int) {
+	tv.ForEach(func(i int, j int) {
+		d := tv[i][j]
 		if d != 0 {
 			fmt.Println(i, j, d)
 		}

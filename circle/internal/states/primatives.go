@@ -21,10 +21,10 @@ func NewMatrix[T any](m int, n int) Matrix[T] {
 	return r
 }
 
-func (m *Matrix[T]) ForEach(f func(int, int, T)) {
+func (m *Matrix[T]) ForEach(f func(int, int)) {
 	for j := 0; j < m.N(); j++ {
 		for i := 0; i < m.M(); i++ {
-			f(i, j, (*m)[i][j])
+			f(i, j)
 		}
 	}
 }

@@ -23,7 +23,7 @@ import (
 	"states"
 )
 
-const space = 20
+const space = 2000
 const speeds = 40
 
 const resolution = 10
@@ -39,13 +39,24 @@ func timespeed(a int, b int) int {
 	return 0
 }
 
+func progress(fraction *int, current int, total int) {
+	f := current * 100 / total
+	if f != *fraction {
+		fmt.Println(f)
+	}
+	*fraction = f
+}
+
 func main() {
-	u := states.MakeUniverse(space, speeds)
+	u := states.MakeUniverse(speeds, space)
 	//den := states.MakeDistribution(10, 50)
 	den := states.MakeDistributionSet(resolution, precision)
 	//fmt.Println(ds)
 
+	prog := 0
 	for t := 0; t < space; t++ {
+		progress(&prog, t, space)
+
 		d := u.Density()
 		den.Inc(d[:], 1)
 		//fmt.Println(p, d)
@@ -55,7 +66,10 @@ func main() {
 
 	var tv = states.NewMatrix[int](resolution, precision)
 
+	prog = 0
 	for t := 0; t < space; t++ {
+		progress(&prog, t, space)
+
 		d := u.Density()
 		p := den.Val(d[:])
 		//fmt.Println(p, d)

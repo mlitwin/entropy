@@ -5,11 +5,11 @@ import (
 )
 
 func TestMakeDensity(t *testing.T) {
-	MakeDensity()
+	MakeDensity(1)
 }
 
 func TestBasic(t *testing.T) {
-	d := MakeDensity()
+	d := MakeDensity(1)
 	h := make([]int, 10)
 	k := d.Val(h)
 

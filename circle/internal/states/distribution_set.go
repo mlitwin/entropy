@@ -19,16 +19,26 @@ func MakeDistributionSet(resolution int, sensitivity int) DistributionSet {
 
 func (d *DistributionSet) Val(s State) Matrix[int] {
 	r := NewMatrix[int](d.Resolution, d.Sensitivity)
-	r.ForEach(func(i int, j int) {
-		r[i][j] = d.D[i][j].Val(s)
-	})
+	for i := 0; i < d.Resolution; i++ {
+		sub := d.D[i][0].MakeSubstate(s)
+
+		for j := 0; j < d.Sensitivity; j++ {
+			r[i][j] = d.D[i][j].Val(sub)
+		}
+	}
 	return r
 }
 
 func (d *DistributionSet) Inc(s State, n int) Matrix[int] {
 	r := NewMatrix[int](d.Resolution, d.Sensitivity)
-	r.ForEach(func(i int, j int) {
-		r[i][j] = d.D[i][j].Inc(s, n)
-	})
+
+	for i := 0; i < d.Resolution; i++ {
+		sub := d.D[i][0].MakeSubstate(s)
+
+		for j := 0; j < d.Sensitivity; j++ {
+			r[i][j] = d.D[i][j].Inc(sub, n)
+		}
+	}
+
 	return r
 }

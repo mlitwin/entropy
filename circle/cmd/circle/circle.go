@@ -23,11 +23,11 @@ import (
 	"states"
 )
 
-const space = 2000
-const speeds = 40
+const space = 1000
+const speeds = 50
 
-const resolution = 10
-const precision = 50
+const resolution = 2
+const precision = 1000
 
 func timespeed(a int, b int) int {
 	if a < b {

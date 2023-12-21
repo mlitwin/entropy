@@ -6,37 +6,35 @@ type Distribution struct {
 	D           Density
 }
 
-func makeSubstate(s State, resolution int, sensitivity int) (sub State) {
-	n := len(s) / resolution
-	if n*resolution < len(s) {
+func (d *Distribution) MakeSubstate(s State) (sub State) {
+	n := len(s) / d.Resolution
+	if n*d.Resolution < len(s) {
 		n++
 	}
 
 	sub = make([]int, n)
 	for i := range sub {
 		t := 0
-		x := i * resolution
-		for x < (i+1)*resolution {
+		x := i * d.Resolution
+		for x < (i+1)*d.Resolution {
 			t += s[Mod(x, n)]
 			x++
 		}
-		sub[i] = t / sensitivity
+		sub[i] = t
 	}
 	return
 }
 
 func MakeDistribution(resolution int, sensitivity int) Distribution {
-	d := Distribution{resolution, sensitivity, MakeDensity()}
+	d := Distribution{resolution, sensitivity, MakeDensity(sensitivity)}
 
 	return d
 }
 
-func (d *Distribution) Val(s State) int {
-	sub := makeSubstate(s, d.Resolution, d.Sensitivity)
+func (d *Distribution) Val(sub State) int {
 	return d.D.Val(sub)
 }
 
-func (d *Distribution) Inc(s State, n int) int {
-	sub := makeSubstate(s, d.Resolution, d.Sensitivity)
+func (d *Distribution) Inc(sub State, n int) int {
 	return d.D.Inc(sub, n)
 }

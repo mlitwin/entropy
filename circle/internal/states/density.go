@@ -3,41 +3,44 @@ package states
 import (
 	"math"
 	"strconv"
+	"strings"
 )
 
 type State []int
 
-func stateHash(s State) (r string) {
+func (d *Density) stateHash(s State) string {
+
+	var sb strings.Builder
 
 	for _, v := range s {
-		vs := strconv.Itoa(v)
-		if len(r) > 0 {
-			r += ":"
-		}
-		r += vs
+		vs := strconv.Itoa(v / d.Sensitivity)
+		sb.WriteString(":")
+		sb.WriteString(vs)
 	}
 
-	return
+	return sb.String()
 }
 
 type Density struct {
-	m map[string]int
-	n int
+	Sensitivity int
+	m           map[string]int
+	n           int
 }
 
-func MakeDensity() Density {
+func MakeDensity(sensitivity int) Density {
 	d := Density{}
+	d.Sensitivity = sensitivity
 	d.m = make(map[string]int)
 
 	return d
 }
 func (d *Density) Val(s State) int {
-	h := stateHash(s)
+	h := d.stateHash(s)
 	return d.m[h]
 }
 
 func (d *Density) Inc(s State, n int) int {
-	h := stateHash(s)
+	h := d.stateHash(s)
 	d.m[h] += n
 	d.n += n
 

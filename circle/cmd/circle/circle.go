@@ -55,7 +55,7 @@ func main() {
 
 	prog := 0
 	for t := 0; t < space; t++ {
-		progress(&prog, t, space)
+		progress(&prog, t, 2*space)
 
 		d := u.Density()
 		den.Inc(d[:], 1)
@@ -68,7 +68,7 @@ func main() {
 
 	prog = 0
 	for t := 0; t < space; t++ {
-		progress(&prog, t, space)
+		progress(&prog, t, 2*space)
 
 		d := u.Density()
 		p := den.Val(d[:])
@@ -78,7 +78,7 @@ func main() {
 		d1 := u.Density()
 		p2 := den.Val(d1[:])
 		tv.ForEach(func(i, j int) {
-			tv[i][j] = timespeed(p[i][j], p2[i][j])
+			tv[i][j] += timespeed(p[i][j], p2[i][j])
 
 		})
 	}

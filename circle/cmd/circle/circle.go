@@ -26,8 +26,8 @@ import (
 const space = 1000
 const speeds = 50
 
-const resolution = 2
-const precision = 1000
+const resolution = 4
+const precision = 100
 
 func timespeed(a int, b int) int {
 	if a < b {

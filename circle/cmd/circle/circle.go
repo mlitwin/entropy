@@ -23,7 +23,7 @@ import (
 	"states"
 )
 
-const space = 1000
+const space = 200
 const speeds = 50
 
 const resolution = 4
@@ -66,9 +66,8 @@ func main() {
 
 	var tv = states.NewMatrix[int](resolution, precision)
 
-	prog = 0
 	for t := 0; t < space; t++ {
-		progress(&prog, t, 2*space)
+		progress(&prog, t+space, 2*space)
 
 		d := u.Density()
 		p := den.Val(d[:])
@@ -89,7 +88,9 @@ func main() {
 		d := tv[i][j]
 		trend += d
 		if d != 0 {
-			fmt.Println(i, j, d)
+			const speeds = 50
+			r := float32(j+1) / float32(speeds)
+			fmt.Println(i, j, r, d)
 		}
 	})
 

@@ -11,6 +11,7 @@ type State []int
 func (d *Density) stateHash(s State) string {
 
 	var sb strings.Builder
+	sb.Grow(len(s) * 10)
 
 	for _, v := range s {
 		vs := strconv.Itoa(v / d.Sensitivity)

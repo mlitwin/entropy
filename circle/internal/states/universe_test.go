@@ -4,10 +4,10 @@ import (
 	"testing"
 )
 
-const space = 400
+const space = 1000
 const speeds = 50
 
-const resolution = 1
+const resolution = 2
 const precision = 40
 
 func BenchmarkUniverse(b *testing.B) {

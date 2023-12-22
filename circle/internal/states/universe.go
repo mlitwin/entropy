@@ -1,22 +1,5 @@
 package states
 
-/*
-Chaos Umpire sits,
-And by decision more imbroiles the fray
-By which he Reigns: next him high Arbiter
-Chance governs all. Into this wilde Abyss,
-The Womb of nature and perhaps her Grave,
-Of neither Sea, nor Shore, nor Air, nor Fire,
-But all these in thir pregnant causes mixt
-Confus'dly, and which thus must ever fight,
-Unless th' Almighty Maker them ordain
-His dark materials to create more Worlds,
-Into this wild Abyss the warie fiend
-Stood on the brink of Hell and look'd a while,
-Pondering his Voyage: for no narrow frith
-He had to cross.
-*/
-
 import (
 	"math/rand"
 )
@@ -33,6 +16,22 @@ type Universe struct {
 	green         Matrix[int]
 }
 
+/*
+Chaos Umpire sits,
+And by decision more imbroiles the fray
+By which he Reigns: next him high Arbiter
+Chance governs all. Into this wilde Abyss,
+The Womb of nature and perhaps her Grave,
+Of neither Sea, nor Shore, nor Air, nor Fire,
+But all these in thir pregnant causes mixt
+Confus'dly, and which thus must ever fight,
+Unless th' Almighty Maker them ordain
+His dark materials to create more Worlds,
+Into this wild Abyss the warie fiend
+Stood on the brink of Hell and look'd a while,
+Pondering his Voyage: for no narrow frith
+He had to cross.
+*/
 func makeDarkMaterials(m *Matrix[int]) (count int) {
 	for v := 0; v < m.M(); v++ {
 		for x := 0; x < m.N(); x++ {

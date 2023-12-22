@@ -1,23 +1,5 @@
 package main
 
-/*
-To whom these most adhere,
-Hee rules a moment; Chaos Umpire sits,
-And by decision more imbroiles the fray
-By which he Reigns: next him high Arbiter
-Chance governs all. Into this wilde Abyss, [ 910 ]
-The Womb of nature and perhaps her Grave,
-Of neither Sea, nor Shore, nor Air, nor Fire,
-But all these in thir pregnant causes mixt
-Confus'dly, and which thus must ever fight,
-Unless th' Almighty Maker them ordain [ 915 ]
-His dark materials to create more Worlds,
-Into this wild Abyss the warie fiend
-Stood on the brink of Hell and look'd a while,
-Pondering his Voyage: for no narrow frith
-He had to cross.
-*/
-
 import (
 	"fmt"
 	"states"
@@ -27,7 +9,7 @@ const space = 200
 const speeds = 50
 
 const resolution = 4
-const precision = 100
+const precision = 200
 
 func timespeed(a int, b int) int {
 	if a < b {

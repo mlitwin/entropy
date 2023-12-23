@@ -1,12 +1,14 @@
 package states
 
 type sliceMapEntry struct {
-	val  int
+	val  *int
 	next map[int](*sliceMapEntry)
 }
 
 func makeSliceMapEntry() *sliceMapEntry {
 	var e sliceMapEntry
+	var val int
+	e.val = &val
 	e.next = make(map[int](*sliceMapEntry))
 
 	return &e
@@ -23,12 +25,11 @@ func MakeSliceMap() SliceMap {
 	return s
 }
 
-func (s *SliceMap) Inc(v []int, n int) (ret int) {
+func (s *SliceMap) ValPtr(v []int) (ret *int) {
 	cur := s.root
 	for i, x := range v {
 		if i == len(v)-1 {
 			ret = cur.val
-			cur.val += n
 		} else {
 			next := cur.next[x]
 			if nil == next {
@@ -42,6 +43,14 @@ func (s *SliceMap) Inc(v []int, n int) (ret int) {
 	return
 }
 
+func (s *SliceMap) Inc(v []int, n int) (ret int) {
+	val := s.ValPtr(v)
+	ret = *val
+	*val += n
+
+	return
+}
+
 func (s *SliceMap) Val(v []int) (ret int) {
 	cur := s.root
 	for i, x := range v {
@@ -49,7 +58,7 @@ func (s *SliceMap) Val(v []int) (ret int) {
 			break
 		}
 		if i == len(v)-1 {
-			ret = cur.val
+			ret = *cur.val
 		} else {
 			cur = cur.next[x]
 		}

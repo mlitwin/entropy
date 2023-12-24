@@ -7,8 +7,7 @@ type sliceMapEntry struct {
 
 func makeSliceMapEntry() *sliceMapEntry {
 	var e sliceMapEntry
-	var val int
-	e.val = &val
+
 	e.next = make(map[int](*sliceMapEntry))
 
 	return &e
@@ -29,6 +28,10 @@ func (s *SliceMap) ValPtr(v []int) (ret *int) {
 	cur := s.root
 	for i, x := range v {
 		if i == len(v)-1 {
+			if nil == cur.val {
+				var val int
+				cur.val = &val
+			}
 			ret = cur.val
 		} else {
 			next := cur.next[x]

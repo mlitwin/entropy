@@ -1,8 +1,8 @@
 package states
 
 type sliceMapEntry struct {
-	val  *int
-	next map[int](*sliceMapEntry)
+	valPtr int
+	next   map[int](*sliceMapEntry)
 }
 
 func makeSliceMapEntry() *sliceMapEntry {
@@ -14,7 +14,8 @@ func makeSliceMapEntry() *sliceMapEntry {
 }
 
 type SliceMap struct {
-	root *sliceMapEntry
+	values []int
+	root   *sliceMapEntry
 }
 
 func MakeSliceMap() SliceMap {
@@ -24,15 +25,15 @@ func MakeSliceMap() SliceMap {
 	return s
 }
 
-func (s *SliceMap) ValPtr(v []int) (ret *int) {
+func (s *SliceMap) ValPtr(v []int) (ret int) {
 	cur := s.root
 	for i, x := range v {
 		if i == len(v)-1 {
-			if nil == cur.val {
-				var val int
-				cur.val = &val
+			if 0 == cur.valPtr {
+				cur.valPtr = len(s.values) + 1
+				s.values = append(s.values, 0)
 			}
-			ret = cur.val
+			ret = cur.valPtr - 1
 		} else {
 			next := cur.next[x]
 			if nil == next {
@@ -48,8 +49,8 @@ func (s *SliceMap) ValPtr(v []int) (ret *int) {
 
 func (s *SliceMap) Inc(v []int, n int) (ret int) {
 	val := s.ValPtr(v)
-	ret = *val
-	*val += n
+	ret = s.values[val]
+	s.values[val] += n
 
 	return
 }
@@ -61,7 +62,7 @@ func (s *SliceMap) Val(v []int) (ret int) {
 			break
 		}
 		if i == len(v)-1 {
-			ret = *cur.val
+			ret = s.values[cur.valPtr-1]
 		} else {
 			cur = cur.next[x]
 		}

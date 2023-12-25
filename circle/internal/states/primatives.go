@@ -1,5 +1,8 @@
 package states
 
+type Vector = []int
+type Measurement = []int
+
 type Matrix[T any] [][]T
 
 func (m *Matrix[T]) M() int {
@@ -8,9 +11,6 @@ func (m *Matrix[T]) M() int {
 func (m *Matrix[T]) N() int {
 	return len((*m)[0])
 }
-
-type Vector = []int
-type Measurement = []int
 
 func NewMatrix[T any](m int, n int) Matrix[T] {
 	r := make([][]T, m)

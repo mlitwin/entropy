@@ -3,12 +3,16 @@ package states
 type DensityValue interface{}
 type DensityIncrementer[T DensityValue] interface {
 	Inc(*T, int)
+	Construct(Measurement)
 }
 
 type IntIncrementer struct{}
 
 func (IntIncrementer) Inc(x *int, n int) {
 	(*x) += n
+}
+
+func (IntIncrementer) Construct(Measurement) {
 }
 
 type sliceMapEntry struct {
@@ -36,6 +40,11 @@ func MakeSliceMap[T DensityValue](incrementer DensityIncrementer[T]) SliceMap[T]
 	s.root = makeSliceMapEntry()
 
 	return s
+}
+
+func MakeSliceMapOfInt() SliceMap[int] {
+	return MakeSliceMap[int](new(IntIncrementer))
+
 }
 
 func (s *SliceMap[T]) ValPtr(v []int) (ret int) {

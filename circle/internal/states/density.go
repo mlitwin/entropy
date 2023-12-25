@@ -19,7 +19,7 @@ type Density struct {
 func MakeDensity(sensitivity int) Density {
 	d := Density{}
 	d.Sensitivity = sensitivity
-	d.m = MakeSliceMap[int](new(IntIncrementer))
+	d.m = MakeSliceMapOfInt()
 
 	return d
 }
@@ -34,5 +34,4 @@ func (d *Density) Inc(s State, n int) int {
 	d.n += n
 
 	return d.m.Inc(h, n)
-
 }

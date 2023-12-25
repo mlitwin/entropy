@@ -6,7 +6,7 @@ import (
 
 func TestSliceMap(t *testing.T) {
 	var v [10]int
-	s := MakeSliceMap()
+	s := MakeSliceMap[int](new(IntIncrementer))
 
 	r := s.Inc(v[:], 1)
 

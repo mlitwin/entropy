@@ -9,6 +9,7 @@ func TestMakeDistribution(t *testing.T) {
 	var s [10]int
 
 	d.Inc(s[:], 7)
+
 	if d.Val(s[:]) != 7 {
 		t.Fatal("Failed to set")
 	}

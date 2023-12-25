@@ -12,14 +12,14 @@ func (d *Density) stateHash(s State) State {
 
 type Density struct {
 	Sensitivity int
-	m           SliceMap
+	m           SliceMap[int]
 	n           int
 }
 
 func MakeDensity(sensitivity int) Density {
 	d := Density{}
 	d.Sensitivity = sensitivity
-	d.m = MakeSliceMap()
+	d.m = MakeSliceMap[int](new(IntIncrementer))
 
 	return d
 }

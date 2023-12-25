@@ -1,5 +1,16 @@
 package states
 
+type DensityValue interface{}
+type DensityIncrementer[T DensityValue] interface {
+	Inc(*T, int)
+}
+
+type IntIncrementer struct{}
+
+func (IntIncrementer) Inc(x *int, n int) {
+	(*x) += n
+}
+
 type sliceMapEntry struct {
 	valPtr int
 	next   map[int](*sliceMapEntry)
@@ -13,25 +24,28 @@ func makeSliceMapEntry() *sliceMapEntry {
 	return &e
 }
 
-type SliceMap struct {
-	values []int
-	root   *sliceMapEntry
+type SliceMap[T DensityValue] struct {
+	incrementer DensityIncrementer[T]
+	root        *sliceMapEntry
+	values      []T
 }
 
-func MakeSliceMap() SliceMap {
-	var s SliceMap
+func MakeSliceMap[T DensityValue](incrementer DensityIncrementer[T]) SliceMap[T] {
+	var s SliceMap[T]
+	s.incrementer = incrementer
 	s.root = makeSliceMapEntry()
 
 	return s
 }
 
-func (s *SliceMap) ValPtr(v []int) (ret int) {
+func (s *SliceMap[T]) ValPtr(v []int) (ret int) {
 	cur := s.root
 	for i, x := range v {
 		if i == len(v)-1 {
 			if 0 == cur.valPtr {
 				cur.valPtr = len(s.values) + 1
-				s.values = append(s.values, 0)
+				var zero T
+				s.values = append(s.values, zero)
 			}
 			ret = cur.valPtr - 1
 		} else {
@@ -47,15 +61,15 @@ func (s *SliceMap) ValPtr(v []int) (ret int) {
 	return
 }
 
-func (s *SliceMap) Inc(v []int, n int) (ret int) {
+func (s *SliceMap[T]) Inc(v []int, n int) (ret T) {
 	val := s.ValPtr(v)
 	ret = s.values[val]
-	s.values[val] += n
+	s.incrementer.Inc(&(s.values[val]), n)
 
 	return
 }
 
-func (s *SliceMap) Val(v []int) (ret int) {
+func (s *SliceMap[T]) Val(v []int) (ret T) {
 	cur := s.root
 	for i, x := range v {
 		if nil == cur {

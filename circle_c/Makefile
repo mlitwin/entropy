@@ -2,13 +2,28 @@ CC = gcc
 CFLAGS = -g -Wall -O0 -std=c99 -I./types
 LDFLAGS =
 
-SOURCES = main.c types/hashmap.c types/matrix.c
-OBJECTS = $(SOURCES:.c=.o)
+OBJDIR=build/objs/
+
+SOURCES = $(wildcard src/lib/*/*.c)
+OBJECTS = $(addprefix $(OBJDIR), $(SOURCES:.c=.o))
+DEPS = $(addprefix $(OBJDIR), $(SOURCES:.c=.d))
+
 TARGET = circle
-$(TARGET) : $(OBJECTS)
+
+all: $(TARGET)
+
+
+$(OBJDIR)%.o : %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CXXFLAGS) -c $< -o $@
+
+$(OBJDIR)main.o : src/main.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CXXFLAGS) -c $< -o $@
+$(TARGET) : $(OBJECTS) $(OBJDIR)main.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 .PHONY: clean
 
 clean:
-	@rm -f $(TARGET) $(OBJECTS) core
+	@rm -rf $(TARGET) $(OBJDIR)*

@@ -21,3 +21,19 @@ void DestroyMatrix(Matrix M, int n)
         free(M[j]);
     }
 }
+
+#ifdef TEST
+#include "test.h"
+void TEST_matrix()
+{
+    int **m = NewMatrix(20, 30);
+    m[4][7] = 22;
+
+    if (m[4][7] != 22)
+    {
+        FAIL("Can't set matrix 22 != %d", m[4][7]);
+    }
+
+    DestroyMatrix(m, 20);
+}
+#endif

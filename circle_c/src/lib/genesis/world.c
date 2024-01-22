@@ -10,7 +10,7 @@ static void declareDarkMaterials(World *w)
     {
         for (int i = 0; i < w->n; i++)
         {
-            const int val = rand() % 3;
+            const int val = rand() % 30;
             w->cur[j][i] = val;
             w->observation[i] += val;
         }
@@ -25,6 +25,7 @@ void CreateNeWorld(World *w, int n, int v)
     w->v = v;
     w->a = NewMatrix(v, n);
     w->b = NewMatrix(v, n);
+    w->densities = NewMatrix(n, n);
     w->observation = calloc(n, sizeof(int));
     w->cur = w->a;
     w->next = w->b;

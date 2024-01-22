@@ -4,6 +4,13 @@
 
 #define INITIAL_MAP_LEN (32)
 
+/*
+static int mod(int i, int n)
+{
+    return (i % n + n) % n;
+}
+*/
+
 struct mapNode
 {
     VectorValue value;
@@ -51,13 +58,15 @@ static void ensureNext(struct mapNode *node, int n)
 
 struct VectorMap
 {
+    int sensitivity;
     struct mapNode *root;
 };
 
 VectorMap *
-NewVectorMap()
+NewVectorMap(int sensitivity)
 {
     VectorMap *v = calloc(sizeof(VectorMap), 1);
+    v->sensitivity = sensitivity;
     v->root = NewMapNode();
     return v;
 }
@@ -72,7 +81,7 @@ static VectorValue *getValue(VectorMap *vm, int *vec, int n)
     struct mapNode *cur = vm->root;
     for (int i = 0; i < n; i++)
     {
-        const int index = vec[i];
+        const int index = vec[i] / vm->sensitivity;
         ensureNext(cur, index);
         if (!cur->next[index])
         {
@@ -94,7 +103,7 @@ VectorValue *VectorMap_Get(VectorMap *vm, int *vec, int n)
 void TEST_VectorMap()
 {
     int vec[] = {1, 2, 3, 4};
-    VectorMap *v = NewVectorMap();
+    VectorMap *v = NewVectorMap(1);
     VectorValue *val = VectorMap_Get(v, vec, 4);
     val = VectorMap_Get(v, vec, 4);
     if (0 != val->value)

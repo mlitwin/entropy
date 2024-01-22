@@ -8,6 +8,7 @@ typedef struct
     int v;
     Matrix cur;
     int *observation;
+    Matrix densities;
 
     Matrix next;
     Matrix a;

@@ -3,23 +3,21 @@
 
 int **NewMatrix(int n, int m)
 {
-    int **ret;
+    int **ret = calloc(n, sizeof(int *));
+    *ret = calloc(n * m, sizeof(int));
 
-    ret = calloc(n, sizeof(int *));
     for (int j = 0; j < n; j++)
     {
-        ret[j] = calloc(m, sizeof(int));
+        ret[j] = *ret + j * m;
     }
 
     return ret;
 }
 
-void DestroyMatrix(Matrix M, int n)
+void DestroyMatrix(Matrix m, int n)
 {
-    for (int j = 0; j < n; j++)
-    {
-        free(M[j]);
-    }
+    free(*m);
+    free(m);
 }
 
 #ifdef TEST

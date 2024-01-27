@@ -4,44 +4,62 @@
 #include <stdlib.h>
 #include <strings.h>
 
+static void incrementVectorMaps(World *w)
+{
+    for (int i = 0; i < w->n; i++)
+    {
+        VectorValue *v = VectorMap_Get(w->vm[i], w->densities, w->n);
+        v->value++;
+    }
+}
+
 static void declareDarkMaterials(World *w)
 {
     for (int j = 0; j < w->v; j++)
     {
         for (int i = 0; i < w->n; i++)
         {
-            const int val = rand() % 30;
+            const int val = rand() % w->v;
             w->cur[j][i] = val;
-            w->observation[i] += val;
+            w->densities[i] += val;
         }
     }
+    incrementVectorMaps(w);
 }
 
-void CreateNeWorld(World *w, int n, int v)
+void CreateNeWorld(World *w, int n, int v, int precision, int sensitivity)
 {
     v *= 2;
 
     w->n = n;
     w->v = v;
+    w->precision = precision;
+    w->sensitivity = sensitivity;
+
     w->a = NewMatrix(v, n);
     w->b = NewMatrix(v, n);
-    w->densities = NewMatrix(n, n);
-    w->observation = calloc(n, sizeof(int));
+    w->densities = calloc(sizeof(int), w->n);
     w->cur = w->a;
     w->next = w->b;
+    w->vm = calloc(sizeof(VectorMap *), w->n);
+    for (int i = 0; i < w->n; i++)
+    {
+        w->vm[i] = NewVectorMap(i + 1);
+    }
 
     declareDarkMaterials(w);
 }
 
 void DestroyWorld(World *w)
 {
-    DestroyMatrix(w->a, w->v);
-    DestroyMatrix(w->b, w->v);
+    DestroyMatrix(w->a);
+    DestroyMatrix(w->b);
+    free(w->densities);
 }
 
 void AdvanceWorld(World *w)
 {
-    bzero(w->observation, w->n * sizeof(int));
+    bzero(w->densities, w->n * sizeof(int));
 
     for (int j = 0; j < w->v; j++)
     {
@@ -59,10 +77,13 @@ void AdvanceWorld(World *w)
             }
 
             next_row[nextI] = curVal;
-            w->observation[nextI] += curVal;
+
+            w->densities[nextI / w->precision] += curVal;
+
             cur_row[i] = 0;
         }
     }
+    incrementVectorMaps(w);
     Matrix tmp = w->cur;
     w->cur = w->next;
     w->next = tmp;
@@ -73,7 +94,19 @@ void PrintWorld(const World *w)
     for (int i = 0; i < w->n; i++)
     {
         const char *sep = (i == 0) ? "(" : " ";
-        printf("%s%d", sep, w->observation[i]);
+        printf("%s%d", sep, w->densities[i]);
     }
     printf(")\n");
 }
+
+#ifdef TEST
+#include "test.h"
+void TEST_World()
+{
+    World w;
+    sranddev();
+    CreateNeWorld(&w, 10, 10, 1, 1);
+    AdvanceWorld(&w);
+    DestroyWorld(&w);
+}
+#endif

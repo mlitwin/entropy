@@ -76,6 +76,29 @@ void DestroyVectorMap(VectorMap *v)
     free(v);
 }
 
+VectorMap ***NewMatrixOfVectorMap(int n, int m)
+{
+    VectorMap ***ret = calloc(n, sizeof(VectorMap **));
+    **ret = calloc(n * m, sizeof(VectorMap *));
+
+    for (int i = 0; i < n; i++)
+    {
+        ret[i] = *ret + i * m;
+        for (int j = 0; j < m; j++)
+        {
+            ret[i][j] = NewVectorMap(j + 1);
+        }
+    }
+
+    return ret;
+}
+
+void DestroyMatrixOfVectorMap(VectorMap **vm)
+{
+    free(*vm);
+    free(vm);
+}
+
 static VectorValue *getValue(VectorMap *vm, int *vec, int n)
 {
     struct mapNode *cur = vm->root;
@@ -103,7 +126,7 @@ VectorValue *VectorMap_Get(VectorMap *vm, int *vec, int n)
 void TEST_VectorMap()
 {
     int vec[] = {1, 2, 3, 4};
-    VectorMap *v = NewVectorMap(1);
+    VectorMap *v = NewVectorMap(1000);
     VectorValue *val = VectorMap_Get(v, vec, 4);
     val = VectorMap_Get(v, vec, 4);
     if (0 != val->value)

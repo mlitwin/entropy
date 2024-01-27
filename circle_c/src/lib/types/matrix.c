@@ -14,7 +14,7 @@ int **NewMatrix(int n, int m)
     return ret;
 }
 
-void DestroyMatrix(Matrix m, int n)
+void DestroyMatrix(Matrix m)
 {
     free(*m);
     free(m);
@@ -32,6 +32,6 @@ void TEST_matrix()
         FAIL("Can't set matrix 22 != %d", m[4][7]);
     }
 
-    DestroyMatrix(m, 20);
+    DestroyMatrix(m);
 }
 #endif

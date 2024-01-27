@@ -7,26 +7,40 @@
 int main(int argc, char *argv[])
 {
     World w;
-    VectorMap *vm;
+    int *m;
+    // VectorMap *vm;
 
     sranddev();
-    vm = NewVectorMap(1, 100);
-    CreateNeWorld(&w, 40, 10);
+    // vm = NewVectorMap(w->sensitivity);
+    CreateNeWorld(&w, 13, 2, 1, 1);
+    m = calloc(sizeof(int), w.n);
 
     for (int t = 0; t < w.n; t++)
     {
-        VectorValue *v = VectorMap_Get(vm, w.observation, w.n);
-        (v->value)++;
-        // PrintWorld(&w);
+
+        for (int i = 0; i < w.n; i++)
+        {
+            VectorValue *v = VectorMap_Get(w.vm[i], w.densities, w.n);
+            (v->value)++;
+            if (t == w.n - 1)
+            {
+                m[i] = v->value;
+            }
+        }
+
+        // printf(".\n");
+        PrintWorld(&w);
         AdvanceWorld(&w);
     }
     for (int t = 0; t < w.n; t++)
     {
-        VectorValue *v = VectorMap_Get(vm, w.observation, w.n);
-        // PrintWorld(&w);
+        for (int i = 0; i < w.n; i++)
+        {
 
-        PrintWorld(&w);
-        printf("%d: x %d\n", t, v->value);
+            VectorValue *v = VectorMap_Get(w.vm[i], w.densities, w.n);
+            printf("%d: (%d) x %d\n", t, i, v->value);
+        }
+        // PrintWorld(&w);
     }
     AdvanceWorld(&w);
 

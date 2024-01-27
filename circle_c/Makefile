@@ -34,4 +34,4 @@ test:
 	./runtest
 
 clean:
-	@rm -rf $(TARGET) $(OBJDIR)/*
+	@rm -rf $(TARGET) build/objs/*

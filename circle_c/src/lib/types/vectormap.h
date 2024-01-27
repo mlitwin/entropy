@@ -13,6 +13,8 @@ void DestroyVectorMap(VectorMap *v);
 
 VectorValue *VectorMap_Get(VectorMap *vm, int *vec, int n);
 
+VectorMap ***NewMatrixOfVectorMap(int n, int m);
+
 #ifdef TEST
 void TEST_VectorMap();
 #endif

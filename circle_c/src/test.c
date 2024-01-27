@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 
     TEST_matrix();
     TEST_VectorMap();
+    TEST_World();
 
     return 0;
 }

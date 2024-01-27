@@ -9,13 +9,13 @@ typedef struct
     int v;
     int precision;
     int sensitivity;
-    Matrix cur;
+    int **cur;
     int *densities;
     VectorMap **vm;
 
-    Matrix next;
-    Matrix a;
-    Matrix b;
+    int **next;
+    int **a;
+    int **b;
 } World;
 
 void CreateNeWorld(World *w, int n, int v, int precision, int sensitivity);

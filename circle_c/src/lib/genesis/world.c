@@ -36,8 +36,8 @@ void CreateNeWorld(World *w, int n, int v, int precision, int sensitivity)
     w->precision = precision;
     w->sensitivity = sensitivity;
 
-    w->a = NewMatrix(v, n);
-    w->b = NewMatrix(v, n);
+    w->a = (int **)NewMatrix(sizeof(int), v, n);
+    w->b = (int **)NewMatrix(sizeof(int), v, n);
     w->densities = calloc(sizeof(int), w->n);
     w->cur = w->a;
     w->next = w->b;
@@ -52,8 +52,8 @@ void CreateNeWorld(World *w, int n, int v, int precision, int sensitivity)
 
 void DestroyWorld(World *w)
 {
-    DestroyMatrix(w->a);
-    DestroyMatrix(w->b);
+    DestroyMatrix((void **)w->a);
+    DestroyMatrix((void **)w->b);
     free(w->densities);
 }
 
@@ -84,7 +84,7 @@ void AdvanceWorld(World *w)
         }
     }
     incrementVectorMaps(w);
-    Matrix tmp = w->cur;
+    int **tmp = w->cur;
     w->cur = w->next;
     w->next = tmp;
 }

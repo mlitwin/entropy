@@ -1,14 +1,14 @@
 #include "matrix.h"
 #include <stdlib.h>
 
-int **NewMatrix(int n, int m)
+Matrix NewMatrix(int size, int n, int m)
 {
-    int **ret = calloc(n, sizeof(int *));
-    *ret = calloc(n * m, sizeof(int));
+    void **ret = calloc(n, sizeof(void *));
+    *ret = calloc(size, n * m);
 
     for (int j = 0; j < n; j++)
     {
-        ret[j] = *ret + j * m;
+        ret[j] = (char *)(*ret) + j * size * m;
     }
 
     return ret;
@@ -16,7 +16,7 @@ int **NewMatrix(int n, int m)
 
 void DestroyMatrix(Matrix m)
 {
-    free(*m);
+    free(*(char **)m);
     free(m);
 }
 
@@ -24,7 +24,7 @@ void DestroyMatrix(Matrix m)
 #include "test.h"
 void TEST_matrix()
 {
-    int **m = NewMatrix(20, 30);
+    int **m = NewMatrix(sizeof(int), 20, 30);
     m[4][7] = 22;
 
     if (m[4][7] != 22)

@@ -1,8 +1,8 @@
 #pragma once
 
-typedef int **Matrix;
+typedef void **Matrix;
 
-Matrix NewMatrix(int n, int m);
+Matrix NewMatrix(int size, int n, int m);
 void DestroyMatrix(Matrix m);
 
 #ifdef TEST

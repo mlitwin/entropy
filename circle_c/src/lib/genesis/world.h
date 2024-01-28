@@ -8,7 +8,6 @@ typedef struct
     int n;
     int v;
     int precision;
-    int sensitivity;
     int **cur;
     int *densities;
     VectorMap **vm;
@@ -18,7 +17,7 @@ typedef struct
     int **b;
 } World;
 
-void CreateNeWorld(World *w, int n, int v, int precision, int sensitivity);
+void CreateNeWorld(World *w, int n, int v, int precision);
 
 void DestroyWorld(World *w);
 

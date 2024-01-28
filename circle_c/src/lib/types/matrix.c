@@ -17,14 +17,14 @@ Matrix NewMatrix(int size, int n, int m)
 void DestroyMatrix(Matrix m)
 {
     free(*(char **)m);
-    free(m);
+    free((void *)m);
 }
 
 #ifdef TEST
 #include "test.h"
 void TEST_matrix()
 {
-    int **m = NewMatrix(sizeof(int), 20, 30);
+    int **m = (int **)NewMatrix(sizeof(int), 20, 30);
     m[4][7] = 22;
 
     if (m[4][7] != 22)
@@ -32,6 +32,6 @@ void TEST_matrix()
         FAIL("Can't set matrix 22 != %d", m[4][7]);
     }
 
-    DestroyMatrix(m);
+    DestroyMatrix((void **)m);
 }
 #endif

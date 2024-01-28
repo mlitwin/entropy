@@ -6,6 +6,7 @@
 
 static void incrementVectorMaps(World *w)
 {
+    return;
     for (int i = 0; i < w->n; i++)
     {
         VectorValue *v = VectorMap_Get(w->vm[i], w->densities, w->n);
@@ -27,14 +28,13 @@ static void declareDarkMaterials(World *w)
     incrementVectorMaps(w);
 }
 
-void CreateNeWorld(World *w, int n, int v, int precision, int sensitivity)
+void CreateNeWorld(World *w, int n, int v, int precision)
 {
     v *= 2;
 
     w->n = n;
     w->v = v;
     w->precision = precision;
-    w->sensitivity = sensitivity;
 
     w->a = (int **)NewMatrix(sizeof(int), v, n);
     w->b = (int **)NewMatrix(sizeof(int), v, n);
@@ -83,7 +83,9 @@ void AdvanceWorld(World *w)
             cur_row[i] = 0;
         }
     }
+
     incrementVectorMaps(w);
+
     int **tmp = w->cur;
     w->cur = w->next;
     w->next = tmp;
@@ -105,7 +107,7 @@ void TEST_World()
 {
     World w;
     sranddev();
-    CreateNeWorld(&w, 10, 10, 1, 1);
+    CreateNeWorld(&w, 10, 10, 1);
     AdvanceWorld(&w);
     DestroyWorld(&w);
 }

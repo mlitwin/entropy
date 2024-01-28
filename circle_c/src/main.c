@@ -3,16 +3,33 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 int main(int argc, char *argv[])
 {
     World w;
     int *m;
-    // VectorMap *vm;
+    int n, v, ch;
+    while ((ch = getopt(argc, argv, "n:v:")) != -1)
+    {
+        switch (ch)
+        {
+        case 'n':
+            n = atoi(optarg);
+            break;
+        case 'v':
+            v = atoi(optarg);
+            break;
+        case '?':
+        default:;
+            // usage();
+        }
+    }
+    argc -= optind;
+    argv += optind;
 
     sranddev();
-    // vm = NewVectorMap(w->sensitivity);
-    CreateNeWorld(&w, 13, 2, 1, 1);
+    CreateNeWorld(&w, n, v, 1);
     m = calloc(sizeof(int), w.n);
 
     for (int t = 0; t < w.n; t++)
@@ -22,14 +39,15 @@ int main(int argc, char *argv[])
         {
             VectorValue *v = VectorMap_Get(w.vm[i], w.densities, w.n);
             (v->value)++;
+            // printf("%d: (%d) d %d\n", t, i, v->value);
+
             if (t == w.n - 1)
             {
                 m[i] = v->value;
             }
         }
 
-        // printf(".\n");
-        PrintWorld(&w);
+        // PrintWorld(&w);
         AdvanceWorld(&w);
     }
     for (int t = 0; t < w.n; t++)
@@ -38,11 +56,18 @@ int main(int argc, char *argv[])
         {
 
             VectorValue *v = VectorMap_Get(w.vm[i], w.densities, w.n);
-            printf("%d: (%d) x %d\n", t, i, v->value);
+            int prev = m[i];
+            int delta = v->value - prev;
+            if (0 != delta)
+            {
+                printf("%d: (%d) d %d %d %d\n", t, i, delta, prev, v->value);
+            }
+            m[i] = v->value;
         }
-        // PrintWorld(&w);
+        AdvanceWorld(&w);
+
+        //  PrintWorld(&w);
     }
-    AdvanceWorld(&w);
 
     DestroyWorld(&w);
 

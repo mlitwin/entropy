@@ -4,7 +4,7 @@ MAIN ?= main
 
 CC = gcc
 CFLAGS = -g -Wall -O0 -std=c99 -I./types -D$(MODE) -Isrc/lib
-LDFLAGS =
+LDFLAGS = -lc
 
 OBJDIR=build/objs/$(TARGET)
 

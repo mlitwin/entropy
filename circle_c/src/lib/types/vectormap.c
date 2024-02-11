@@ -1,4 +1,5 @@
 #include "vectormap.h"
+#include "hashmap.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -59,8 +60,37 @@ static void ensureNext(struct mapNode *node, int n)
 struct VectorMap
 {
     int sensitivity;
+    struct hashmap *h;
     struct mapNode *root;
 };
+
+static int vec_cmp(const void *a, const void *b, void *udata)
+{
+    int *v1 = a;
+    int n1 = *(v1 - 1);
+    int *v2 = b;
+    int n2 = *(v2 - 1);
+
+    int i = 0;
+
+    while (i < n1 && i < n2)
+    {
+        int cmp = v2[i] - v1[i];
+        if (0 != cmp)
+        {
+            return cmp;
+        }
+        i++;
+    }
+
+    return n2 - n1;
+}
+
+static uint64_t hash_vec(const void *item, uint64_t seed0, uint64_t seed1)
+{
+    int *v = item;
+    return hashmap_sip(v, *(v - 1) * sizeof(int), seed0, seed1);
+}
 
 VectorMap *
 NewVectorMap(int sensitivity)
@@ -68,6 +98,7 @@ NewVectorMap(int sensitivity)
     VectorMap *v = calloc(sizeof(VectorMap), 1);
     v->sensitivity = sensitivity;
     v->root = NewMapNode();
+    v->h = hashmap_new(sizeof(int *), 0, 0, 0, &hash_vec, vec_cmp, free, NULL);
     return v;
 }
 void DestroyVectorMap(VectorMap *v)

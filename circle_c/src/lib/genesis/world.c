@@ -1,4 +1,5 @@
 #include "world.h"
+#include "../types/vector.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +39,7 @@ void CreateNeWorld(World *w, int n, int v, int precision)
 
     w->a = (int **)NewMatrix(sizeof(int), v, n);
     w->b = (int **)NewMatrix(sizeof(int), v, n);
-    w->densities = calloc(sizeof(int), w->n);
+    w->densities = NewVector(w->n);
     w->cur = w->a;
     w->next = w->b;
     w->vm = calloc(sizeof(VectorMap *), w->n);
@@ -54,7 +55,7 @@ void DestroyWorld(World *w)
 {
     DestroyMatrix((void **)w->a);
     DestroyMatrix((void **)w->b);
-    free(w->densities);
+    DestroyVector(w->densities);
 }
 
 void AdvanceWorld(World *w)

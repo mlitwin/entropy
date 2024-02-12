@@ -1,5 +1,7 @@
 #pragma once
 
+/* A size-prefixed vector of ints */
+
 typedef int *Vector;
 
 Vector NewVector(int n);

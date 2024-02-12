@@ -10,7 +10,7 @@ static void incrementVectorMaps(World *w)
     return;
     for (int i = 0; i < w->n; i++)
     {
-        VectorValue *v = VectorMap_Get(w->vm[i], w->densities);
+        VectorValue *v = VectorMap_Get(w->vm[i], w->densities[w->t]);
         v->value++;
     }
 }
@@ -23,7 +23,7 @@ static void declareDarkMaterials(World *w)
         {
             const int val = rand() % w->v;
             w->cur[j][i] = val;
-            w->densities[i] += val;
+            w->densities[0][i] += val;
         }
     }
     incrementVectorMaps(w);
@@ -39,7 +39,11 @@ void CreateNeWorld(World *w, int n, int v, int precision)
 
     w->a = (int **)NewMatrix(sizeof(int), v, n);
     w->b = (int **)NewMatrix(sizeof(int), v, n);
-    w->densities = NewVector(w->n);
+    w->densities = calloc(sizeof(Vector *), w->n);
+    for (int i = 0; i < w->n; i++)
+    {
+        w->densities[i] = NewVector(w->n);
+    }
     w->cur = w->a;
     w->next = w->b;
     w->vm = calloc(sizeof(VectorMap *), w->n);
@@ -55,12 +59,16 @@ void DestroyWorld(World *w)
 {
     DestroyMatrix((void **)w->a);
     DestroyMatrix((void **)w->b);
-    DestroyVector(w->densities);
+    for (int i = 0; i < w->n; i++)
+    {
+        DestroyVector(w->densities[i]);
+    }
+    free(w->densities);
 }
 
 void AdvanceWorld(World *w)
 {
-    bzero(w->densities, w->n * sizeof(int));
+    w->t++;
 
     for (int j = 0; j < w->v; j++)
     {
@@ -79,7 +87,7 @@ void AdvanceWorld(World *w)
 
             next_row[nextI] = curVal;
 
-            w->densities[nextI / w->precision] += curVal;
+            w->densities[w->t][nextI / w->precision] += curVal;
 
             cur_row[i] = 0;
         }
@@ -97,7 +105,7 @@ void PrintWorld(const World *w)
     for (int i = 0; i < w->n; i++)
     {
         const char *sep = (i == 0) ? "(" : " ";
-        printf("%s%d", sep, w->densities[i]);
+        printf("%s%d", sep, w->densities[w->t][i]);
     }
     printf(")\n");
 }

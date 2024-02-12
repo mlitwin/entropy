@@ -69,10 +69,10 @@ int main(int argc, char *argv[])
     for (int t = 0; t < w.n; t++)
     {
 
-        printf("%d\n", t);
+        printf("first %d\n", t);
         for (int i = 0; i < w.n; i++)
         {
-            VectorValue *v = VectorMap_Get(w.vm[i], w.densities);
+            VectorValue *v = VectorMap_Get(w.vm[i], w.densities[w.t]);
             (v->value)++;
             // printf("%d: (%d) d %d\n", t, i, v->value);
 
@@ -83,7 +83,10 @@ int main(int argc, char *argv[])
         }
 
         // PrintWorld(&w);
-        AdvanceWorld(&w);
+        if (t != w.n - 1)
+        {
+            AdvanceWorld(&w);
+        }
     }
     for (int t = 0; t < w.n; t++)
     {
@@ -92,7 +95,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < w.n; i++)
         {
 
-            VectorValue *v = VectorMap_Get(w.vm[i], w.densities);
+            VectorValue *v = VectorMap_Get(w.vm[i], w.densities[t]);
             int prev = m[i];
             int delta = v->value - prev;
             tv[i] += signum(delta);
@@ -102,7 +105,7 @@ int main(int argc, char *argv[])
             }
             m[i] = v->value;
         }
-        AdvanceWorld(&w);
+        // AdvanceWorld(&w);
 
         //  PrintWorld(&w);
     }

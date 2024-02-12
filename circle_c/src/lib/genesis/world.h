@@ -2,6 +2,7 @@
 
 #include "../types/matrix.h"
 #include "../types/vectormap.h"
+#include "../types/vector.h"
 
 typedef struct
 {
@@ -9,7 +10,8 @@ typedef struct
     int v;
     int precision;
     int **cur;
-    int *densities;
+    int t;
+    Vector *densities;
     VectorMap **vm;
 
     int **next;

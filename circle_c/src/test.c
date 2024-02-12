@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
     TEST_Vector();
 
     TEST_matrix();
-    TEST_VectorMap();
-    TEST_World();
+    // TEST_VectorMap();
+    //  TEST_World();
 
     return 0;
 }

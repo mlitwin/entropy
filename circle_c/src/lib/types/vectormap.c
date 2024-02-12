@@ -13,7 +13,7 @@ static int mod(int i, int n)
 
 struct mapNode
 {
-    VectorValue value;
+    int valueIndex;
     struct mapNode **next;
     int nextLen;
 };
@@ -58,16 +58,21 @@ static void ensureNext(struct mapNode *node, int n)
 
 struct VectorMap
 {
+    int capacity;
     int sensitivity;
-    struct hashmap *h;
+    VectorValue *values;
+    int nextValue;
     struct mapNode *root;
 };
 
 VectorMap *
-NewVectorMap(int sensitivity)
+NewVectorMap(int capacity, int sensitivity)
 {
     VectorMap *v = calloc(sizeof(VectorMap), 1);
+
+    v->capacity = capacity;
     v->sensitivity = sensitivity;
+    v->values = calloc(sizeof(VectorValue), capacity);
     v->root = NewMapNode();
     return v;
 }
@@ -77,7 +82,7 @@ void DestroyVectorMap(VectorMap *v)
     free(v);
 }
 
-VectorMap ***NewMatrixOfVectorMap(int n, int m)
+VectorMap ***NewMatrixOfVectorMap(int capacity, int n, int m)
 {
     VectorMap ***ret = calloc(n, sizeof(VectorMap **));
     **ret = calloc(n * m, sizeof(VectorMap *));
@@ -87,7 +92,7 @@ VectorMap ***NewMatrixOfVectorMap(int n, int m)
         ret[i] = *ret + i * m;
         for (int j = 0; j < m; j++)
         {
-            ret[i][j] = NewVectorMap(j + 1);
+            ret[i][j] = NewVectorMap(capacity, j + 1);
         }
     }
 
@@ -98,6 +103,18 @@ void DestroyMatrixOfVectorMap(VectorMap **vm)
 {
     free(*vm);
     free(vm);
+}
+
+static VectorValue *getValueFromNode(VectorMap *vm, struct mapNode *node)
+{
+    int valueIndex = node->valueIndex;
+    if (valueIndex == 0)
+    {
+        valueIndex = vm->nextValue + 1;
+        node->valueIndex = valueIndex;
+        vm->nextValue++;
+    }
+    return &vm->values[valueIndex - 1];
 }
 
 static VectorValue *getValue(VectorMap *vm, int *vec, int n)
@@ -113,8 +130,7 @@ static VectorValue *getValue(VectorMap *vm, int *vec, int n)
         }
         cur = cur->next[index];
     }
-
-    return &cur->value;
+    return getValueFromNode(vm, cur);
 }
 
 VectorValue *VectorMap_Get(VectorMap *vm, Vector vec)
@@ -127,7 +143,7 @@ VectorValue *VectorMap_Get(VectorMap *vm, Vector vec)
 void TEST_VectorMap()
 {
     int vec[] = {1, 2, 3, 4};
-    VectorMap *v = NewVectorMap(1000);
+    VectorMap *v = NewVectorMap(1, 1);
     VectorValue *val = VectorMap_Get(v, vec);
     val = VectorMap_Get(v, vec);
     if (0 != val->value)

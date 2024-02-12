@@ -1,5 +1,4 @@
 #include "vectormap.h"
-#include "hashmap.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -64,41 +63,12 @@ struct VectorMap
     struct mapNode *root;
 };
 
-static int vec_cmp(const void *a, const void *b, void *udata)
-{
-    int *v1 = a;
-    int n1 = *(v1 - 1);
-    int *v2 = b;
-    int n2 = *(v2 - 1);
-
-    int i = 0;
-
-    while (i < n1 && i < n2)
-    {
-        int cmp = v2[i] - v1[i];
-        if (0 != cmp)
-        {
-            return cmp;
-        }
-        i++;
-    }
-
-    return n2 - n1;
-}
-
-static uint64_t hash_vec(const void *item, uint64_t seed0, uint64_t seed1)
-{
-    int *v = item;
-    return hashmap_sip(v, *(v - 1) * sizeof(int), seed0, seed1);
-}
-
 VectorMap *
 NewVectorMap(int sensitivity)
 {
     VectorMap *v = calloc(sizeof(VectorMap), 1);
     v->sensitivity = sensitivity;
     v->root = NewMapNode();
-    v->h = hashmap_new(sizeof(int *), 0, 0, 0, &hash_vec, vec_cmp, free, NULL);
     return v;
 }
 void DestroyVectorMap(VectorMap *v)
@@ -147,9 +117,9 @@ static VectorValue *getValue(VectorMap *vm, int *vec, int n)
     return &cur->value;
 }
 
-VectorValue *VectorMap_Get(VectorMap *vm, int *vec, int n)
+VectorValue *VectorMap_Get(VectorMap *vm, Vector vec)
 {
-    return getValue(vm, vec, n);
+    return getValue(vm, vec, *(vec - 1));
 }
 
 #ifdef TEST
@@ -158,14 +128,14 @@ void TEST_VectorMap()
 {
     int vec[] = {1, 2, 3, 4};
     VectorMap *v = NewVectorMap(1000);
-    VectorValue *val = VectorMap_Get(v, vec, 4);
-    val = VectorMap_Get(v, vec, 4);
+    VectorValue *val = VectorMap_Get(v, vec);
+    val = VectorMap_Get(v, vec);
     if (0 != val->value)
     {
         FAIL("No VectorMap 0 init got %d", val->value);
     }
     val->value = 7;
-    val = VectorMap_Get(v, vec, 4);
+    val = VectorMap_Get(v, vec);
 
     if (7 != val->value)
     {

@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         printf("%d\n", t);
         for (int i = 0; i < w.n; i++)
         {
-            VectorValue *v = VectorMap_Get(w.vm[i], w.densities, w.n);
+            VectorValue *v = VectorMap_Get(w.vm[i], w.densities);
             (v->value)++;
             // printf("%d: (%d) d %d\n", t, i, v->value);
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < w.n; i++)
         {
 
-            VectorValue *v = VectorMap_Get(w.vm[i], w.densities, w.n);
+            VectorValue *v = VectorMap_Get(w.vm[i], w.densities);
             int prev = m[i];
             int delta = v->value - prev;
             tv[i] += signum(delta);

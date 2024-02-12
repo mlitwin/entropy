@@ -10,7 +10,7 @@ static void incrementVectorMaps(World *w)
     return;
     for (int i = 0; i < w->n; i++)
     {
-        VectorValue *v = VectorMap_Get(w->vm[i], w->densities, w->n);
+        VectorValue *v = VectorMap_Get(w->vm[i], w->densities);
         v->value++;
     }
 }

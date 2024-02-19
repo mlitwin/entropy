@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         printf("first %d\n", t);
         for (int i = 0; i < w.n; i++)
         {
-            int val = VectorMap_Inc(w.vm[i], w.densities[w.t], 1);
+            int val = VectorMap_PreInc(w.vm[i], w.densities[w.t], 1);
             // printf("%d: (%d) d %d\n", t, i, v->value);
 
             if (t == w.n - 1)

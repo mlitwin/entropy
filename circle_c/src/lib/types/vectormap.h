@@ -12,7 +12,7 @@ typedef union
 VectorMap *NewVectorMap(int capacity, int sensitivity);
 void DestroyVectorMap(VectorMap *v);
 void VectorMap_Set(VectorMap *vm, Vector vec, VectorValue val);
-int VectorMap_Inc(VectorMap *vm, Vector vec, int inc);
+int VectorMap_PreInc(VectorMap *vm, Vector vec, int inc);
 
 VectorValue VectorMap_Get(VectorMap *vm, Vector vec);
 

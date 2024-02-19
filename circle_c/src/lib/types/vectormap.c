@@ -168,7 +168,7 @@ void VectorMap_Set(VectorMap *vm, Vector vec, VectorValue val)
     *v = val;
 }
 
-int VectorMap_Inc(VectorMap *vm, Vector vec, int inc)
+int VectorMap_PreInc(VectorMap *vm, Vector vec, int inc)
 {
     VectorValue *v = getValue(vm, vec, *(vec - 1));
     v->value += inc;

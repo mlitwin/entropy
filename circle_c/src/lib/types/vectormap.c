@@ -2,14 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if 0
 static int Vector_Equal(Vector a, Vector b)
 {
     int n = *(a - 1);
-    if (n != *(b - 1))
-    {
-        return 0;
-    }
 
     while (n > 0)
     {
@@ -24,7 +19,6 @@ static int Vector_Equal(Vector a, Vector b)
 
     return 1;
 }
-#endif
 
 #define INITIAL_MAP_LEN (32)
 
@@ -38,6 +32,7 @@ static int mod(int i, int n)
 struct mapNode
 {
     int valueIndex;
+    Vector v;
     struct mapNode **next;
     int nextLen;
 };
@@ -141,11 +136,21 @@ static VectorValue *getValueFromNode(VectorMap *vm, struct mapNode *node)
     return &vm->values[valueIndex - 1];
 }
 
-static VectorValue *getValue(VectorMap *vm, int *vec, int n)
+static VectorValue *getValue(VectorMap *vm, Vector vec, int n)
 {
     struct mapNode *cur = vm->root;
     for (int i = 0; i < n; i++)
     {
+        if (!cur->v)
+        {
+            cur->v = vec;
+            break;
+        }
+        if (Vector_Equal(vec + i, cur->v + i))
+        {
+            break;
+        }
+
         const int index = vec[i] / vm->sensitivity;
         ensureNext(cur, index);
         if (!cur->next[index])
@@ -154,6 +159,7 @@ static VectorValue *getValue(VectorMap *vm, int *vec, int n)
         }
         cur = cur->next[index];
     }
+
     return getValueFromNode(vm, cur);
 }
 

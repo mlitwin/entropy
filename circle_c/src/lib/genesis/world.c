@@ -34,6 +34,7 @@ void CreateNeWorld(World *w, int n, int v, int precision)
 
     w->n = n;
     w->v = v;
+    w->t = 0;
     w->precision = precision;
 
     w->a = (int **)NewMatrix(sizeof(int), v, n);

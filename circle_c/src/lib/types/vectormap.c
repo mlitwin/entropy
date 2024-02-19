@@ -1,14 +1,13 @@
 #include "vectormap.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
-static int Vector_Equal(Vector a, Vector b)
+static int Vector_Equal(int n, int sensitivity, Vector a, Vector b)
 {
-    int n = *(a - 1);
-
     while (n > 0)
     {
-        if (*a != *b)
+        if ((*a) / sensitivity != (*b) / sensitivity)
         {
             return 0;
         }
@@ -146,7 +145,7 @@ static VectorValue *getValue(VectorMap *vm, Vector vec, int n)
             cur->v = vec;
             break;
         }
-        if (Vector_Equal(vec + i, cur->v + i))
+        if (Vector_Equal(n - i, vm->sensitivity, vec + i, cur->v + i))
         {
             break;
         }
@@ -184,17 +183,15 @@ int VectorMap_PreInc(VectorMap *vm, Vector vec, int inc)
 
 #ifdef TEST
 #include "test.h"
-void TEST_VectorMap()
+
+static void testGetSet(VectorMap *v, Vector vec)
 {
-    int vec[] = {1, 2, 3, 4};
-    VectorMap *v = NewVectorMap(1, 1);
     VectorValue val = VectorMap_Get(v, vec);
     if (0 != val.value)
     {
         FAIL("No VectorMap 0 init got %d", val.value);
     }
-    val.value = 7;
-    VectorMap_Set(v, vec, val);
+    VectorMap_PreInc(v, vec, 7);
 
     val = VectorMap_Get(v, vec);
 
@@ -202,6 +199,34 @@ void TEST_VectorMap()
     {
         FAIL("VectorMap setting not working got %d", val.value);
     }
+}
+
+static void
+testAMap(int capacity, int sensitivity)
+{
+    int testCases[] =
+        {1, 3, 4, 5,
+         1, 2, 4, 5};
+
+    VectorMap *v = NewVectorMap(capacity, sensitivity);
+    int numCases = 2;
+    for (int i = 0; i < numCases; i++)
+    {
+        Vector vec = NewVector(4);
+        for (int j = 0; j < 4; j++)
+        {
+            vec[j] = testCases[4 * i + j];
+        }
+        testGetSet(v, vec);
+    }
+
     DestroyVectorMap(v);
+}
+
+void TEST_VectorMap()
+{
+    testAMap(10, 1);
+    // testAMap(10, 2);
+    // testAMap(10, 10);
 }
 #endif

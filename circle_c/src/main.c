@@ -72,13 +72,12 @@ int main(int argc, char *argv[])
         printf("first %d\n", t);
         for (int i = 0; i < w.n; i++)
         {
-            VectorValue *v = VectorMap_Get(w.vm[i], w.densities[w.t]);
-            (v->value)++;
+            int val = VectorMap_Inc(w.vm[i], w.densities[w.t], 1);
             // printf("%d: (%d) d %d\n", t, i, v->value);
 
             if (t == w.n - 1)
             {
-                m[i] = v->value;
+                m[i] = val;
             }
         }
 
@@ -95,15 +94,15 @@ int main(int argc, char *argv[])
         for (int i = 0; i < w.n; i++)
         {
 
-            VectorValue *v = VectorMap_Get(w.vm[i], w.densities[t]);
+            VectorValue v = VectorMap_Get(w.vm[i], w.densities[t]);
             int prev = m[i];
-            int delta = v->value - prev;
+            int delta = v.value - prev;
             tv[i] += signum(delta);
             if (0 != delta)
             {
                 // printf("%d: (%d) d %d %d %d\n", t, i, delta, prev, v->value);
             }
-            m[i] = v->value;
+            m[i] = v.value;
         }
         // AdvanceWorld(&w);
 

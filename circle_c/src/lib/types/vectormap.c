@@ -2,6 +2,30 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if 0
+static int Vector_Equal(Vector a, Vector b)
+{
+    int n = *(a - 1);
+    if (n != *(b - 1))
+    {
+        return 0;
+    }
+
+    while (n > 0)
+    {
+        if (*a != *b)
+        {
+            return 0;
+        }
+        a++;
+        b++;
+        n--;
+    }
+
+    return 1;
+}
+#endif
+
 #define INITIAL_MAP_LEN (32)
 
 /*
@@ -133,9 +157,23 @@ static VectorValue *getValue(VectorMap *vm, int *vec, int n)
     return getValueFromNode(vm, cur);
 }
 
-VectorValue *VectorMap_Get(VectorMap *vm, Vector vec)
+VectorValue VectorMap_Get(VectorMap *vm, Vector vec)
 {
-    return getValue(vm, vec, *(vec - 1));
+    return *getValue(vm, vec, *(vec - 1));
+}
+
+void VectorMap_Set(VectorMap *vm, Vector vec, VectorValue val)
+{
+    VectorValue *v = getValue(vm, vec, *(vec - 1));
+    *v = val;
+}
+
+int VectorMap_Inc(VectorMap *vm, Vector vec, int inc)
+{
+    VectorValue *v = getValue(vm, vec, *(vec - 1));
+    v->value += inc;
+
+    return v->value;
 }
 
 #ifdef TEST
@@ -144,18 +182,19 @@ void TEST_VectorMap()
 {
     int vec[] = {1, 2, 3, 4};
     VectorMap *v = NewVectorMap(1, 1);
-    VectorValue *val = VectorMap_Get(v, vec);
-    val = VectorMap_Get(v, vec);
-    if (0 != val->value)
+    VectorValue val = VectorMap_Get(v, vec);
+    if (0 != val.value)
     {
-        FAIL("No VectorMap 0 init got %d", val->value);
+        FAIL("No VectorMap 0 init got %d", val.value);
     }
-    val->value = 7;
+    val.value = 7;
+    VectorMap_Set(v, vec, val);
+
     val = VectorMap_Get(v, vec);
 
-    if (7 != val->value)
+    if (7 != val.value)
     {
-        FAIL("VectorMap setting not working got %d", val->value);
+        FAIL("VectorMap setting not working got %d", val.value);
     }
     DestroyVectorMap(v);
 }

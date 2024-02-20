@@ -123,7 +123,7 @@ void DestroyMatrixOfVectorMap(VectorMap **vm)
     free(vm);
 }
 
-static VectorValue *getValueFromNode(VectorMap *vm, struct mapNode *node)
+static int getIndexFromNode(VectorMap *vm, struct mapNode *node)
 {
     int valueIndex = node->valueIndex;
     if (valueIndex == 0)
@@ -132,12 +132,13 @@ static VectorValue *getValueFromNode(VectorMap *vm, struct mapNode *node)
         node->valueIndex = valueIndex;
         vm->nextValue++;
     }
-    return &vm->values[valueIndex - 1];
+    return valueIndex;
 }
 
-static VectorValue *getValue(VectorMap *vm, Vector vec, int n)
+static int getIndex(VectorMap *vm, Vector vec, int n)
 {
     struct mapNode *cur = vm->root;
+
     for (int i = 0; i < n; i++)
     {
         if (!cur->v)
@@ -159,7 +160,23 @@ static VectorValue *getValue(VectorMap *vm, Vector vec, int n)
         cur = cur->next[index];
     }
 
-    return getValueFromNode(vm, cur);
+    return getIndexFromNode(vm, cur);
+}
+
+static VectorValue *getValue(VectorMap *vm, Vector vec, int n)
+{
+    const int valueIndex = getIndex(vm, vec, n);
+
+    return &vm->values[valueIndex - 1];
+}
+
+VectorValueRef VectorMap_GetRef(VectorMap *vm, Vector vec)
+{
+    return getIndex(vm, vec, *(vec - 1));
+}
+VectorValue VectorMap_GetFromRef(VectorMap *vm, VectorValueRef ref)
+{
+    return vm->values[ref - 1];
 }
 
 VectorValue VectorMap_Get(VectorMap *vm, Vector vec)

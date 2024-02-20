@@ -29,7 +29,7 @@ $(OBJDIR)/$(MAIN).o : src/$(MAIN).c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)/.depend: $(DEPS)
-	echo "#" > .depend
+	echo "# Automatic Dependencies" > $(OBJDIR)/.depend
 	cat $(DEPS) >> $(OBJDIR)/.depend
 
 $(TARGET) : $(OBJECTS) $(OBJDIR)/$(MAIN).o

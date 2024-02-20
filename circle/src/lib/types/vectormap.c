@@ -76,6 +76,7 @@ static void ensureNext(struct mapNode *node, int n)
 
 struct VectorMap
 {
+    int n;
     int capacity;
     int sensitivity;
     VectorValue *values;
@@ -84,10 +85,10 @@ struct VectorMap
 };
 
 VectorMap *
-NewVectorMap(int capacity, int sensitivity)
+NewVectorMap(int n, int capacity, int sensitivity)
 {
     VectorMap *v = calloc(sizeof(VectorMap), 1);
-
+    v->n = n;
     v->capacity = capacity;
     v->sensitivity = sensitivity;
     v->values = calloc(sizeof(VectorValue), capacity);
@@ -100,7 +101,7 @@ void DestroyVectorMap(VectorMap *v)
     free(v);
 }
 
-VectorMap ***NewMatrixOfVectorMap(int capacity, int n, int m)
+VectorMap ***NewMatrixOfVectorMap(int vecN, int capacity, int n, int m)
 {
     VectorMap ***ret = calloc(n, sizeof(VectorMap **));
     **ret = calloc(n * m, sizeof(VectorMap *));
@@ -110,7 +111,7 @@ VectorMap ***NewMatrixOfVectorMap(int capacity, int n, int m)
         ret[i] = *ret + i * m;
         for (int j = 0; j < m; j++)
         {
-            ret[i][j] = NewVectorMap(capacity, j + 1);
+            ret[i][j] = NewVectorMap(vecN, capacity, j + 1);
         }
     }
 
@@ -135,18 +136,18 @@ static int getIndexFromNode(VectorMap *vm, struct mapNode *node)
     return valueIndex;
 }
 
-static int getIndex(VectorMap *vm, Vector vec, int n)
+static int getIndex(VectorMap *vm, Vector vec)
 {
     struct mapNode *cur = vm->root;
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < vm->n; i++)
     {
         if (!cur->v)
         {
             cur->v = vec;
             break;
         }
-        if (Vector_Equal(n - i, vm->sensitivity, vec + i, cur->v + i))
+        if (Vector_Equal(vm->n - i, vm->sensitivity, vec + i, cur->v + i))
         {
             break;
         }
@@ -163,16 +164,16 @@ static int getIndex(VectorMap *vm, Vector vec, int n)
     return getIndexFromNode(vm, cur);
 }
 
-static VectorValue *getValue(VectorMap *vm, Vector vec, int n)
+static VectorValue *getValue(VectorMap *vm, Vector vec)
 {
-    const int valueIndex = getIndex(vm, vec, n);
+    const int valueIndex = getIndex(vm, vec);
 
     return &vm->values[valueIndex - 1];
 }
 
 VectorValueRef VectorMap_GetRef(VectorMap *vm, Vector vec)
 {
-    return getIndex(vm, vec, *(vec - 1));
+    return getIndex(vm, vec);
 }
 VectorValue VectorMap_GetFromRef(VectorMap *vm, VectorValueRef ref)
 {
@@ -181,18 +182,18 @@ VectorValue VectorMap_GetFromRef(VectorMap *vm, VectorValueRef ref)
 
 VectorValue VectorMap_Get(VectorMap *vm, Vector vec)
 {
-    return *getValue(vm, vec, *(vec - 1));
+    return *getValue(vm, vec);
 }
 
 void VectorMap_Set(VectorMap *vm, Vector vec, VectorValue val)
 {
-    VectorValue *v = getValue(vm, vec, *(vec - 1));
+    VectorValue *v = getValue(vm, vec);
     *v = val;
 }
 
 int VectorMap_PreInc(VectorMap *vm, Vector vec, int inc)
 {
-    VectorValue *v = getValue(vm, vec, *(vec - 1));
+    VectorValue *v = getValue(vm, vec);
     v->value += inc;
 
     return v->value;
@@ -225,7 +226,7 @@ testAMap(int capacity, int sensitivity)
         {1, 3, 4, 5,
          1, 2, 4, 5};
 
-    VectorMap *v = NewVectorMap(capacity, sensitivity);
+    VectorMap *v = NewVectorMap(4, capacity, sensitivity);
     int numCases = 2;
     for (int i = 0; i < numCases; i++)
     {

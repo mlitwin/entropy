@@ -49,7 +49,7 @@ void CreateNeWorld(World *w, int n, int v, int precision)
     w->vm = calloc(sizeof(VectorMap *), w->n);
     for (int i = 0; i < w->n; i++)
     {
-        w->vm[i] = NewVectorMap(n, i + 1);
+        w->vm[i] = NewVectorMap(n, n, i + 1);
     }
 
     declareDarkMaterials(w);

@@ -35,10 +35,7 @@ $(OBJDIR)/.depend: $(DEPS)
 $(TARGET) : $(OBJECTS) $(OBJDIR)/$(MAIN).o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-.PHONY: clean test depend
-
-depend: $(OBJDIR)/.depend
-	echo "#" >> .depend
+.PHONY: clean test
 
 test:
 	make TARGET=runtest MODE=TEST MAIN=test

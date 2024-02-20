@@ -1,13 +1,7 @@
-# Problem
+https://github.com/tidwall/hashmap.c
 
-https://projecteuler.net/problem=85
+https://github.com/ThrowTheSwitch/Unity
 
-# Notes
+./circle -n500 -v3
 
-https://www.mathpages.com/home/kmath279/kmath279.htm
-
-R(m,n) = rects in n x m
-R(1,n) = Sum (n-k+1) =
-= (n+1)*n /2
-
-R(m+1,n) = 2 R(m,n) - R(m-1,n) + R(1,n)
+/circle -n500 -v3 4.73s user 0.27s system 99% cpu 5.003 total

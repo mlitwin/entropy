@@ -1,7 +1,16 @@
-https://github.com/tidwall/hashmap.c
+# Entropy
 
-https://github.com/ThrowTheSwitch/Unity
+## Circle
 
-./circle -n500 -v3
+Particles moving in a circle:
 
-/circle -n500 -v3 4.73s user 0.27s system 99% cpu 5.003 total
+- Discrete space
+- Discrete velocity
+
+Imagine sensors around the circle
+
+- Can't tell velocity, only density
+- Have a certain sensitively - need a quanta before registering
+- Have a certain precision - pick up neighbors at some distance
+
+Simulate - calculate probability space (it's periodic), and find time-asymmetric measures.

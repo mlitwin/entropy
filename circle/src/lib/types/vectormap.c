@@ -180,42 +180,28 @@ VectorValue VectorMap_GetFromRef(VectorMap *vm, VectorValueRef ref)
     return vm->values[ref - 1];
 }
 
-VectorValue VectorMap_Get(VectorMap *vm, Vector vec)
+VectorValue *VectorMap_Get(VectorMap *vm, Vector vec)
 {
-    return *getValue(vm, vec);
-}
-
-void VectorMap_Set(VectorMap *vm, Vector vec, VectorValue val)
-{
-    VectorValue *v = getValue(vm, vec);
-    *v = val;
-}
-
-int VectorMap_PreInc(VectorMap *vm, Vector vec, int inc)
-{
-    VectorValue *v = getValue(vm, vec);
-    v->value += inc;
-
-    return v->value;
+    return getValue(vm, vec);
 }
 
 #ifdef TEST
 #include "test.h"
 
-static void testGetSet(VectorMap *v, Vector vec)
+static void testGetSet(VectorMap *vm, Vector vec)
 {
-    VectorValue val = VectorMap_Get(v, vec);
-    if (0 != val.value)
+    VectorValue *v = VectorMap_Get(vm, vec);
+    if (0 != v->value)
     {
-        FAIL("No VectorMap 0 init got %d", val.value);
+        FAIL("No VectorMap 0 init got %d", v->value);
     }
-    VectorMap_PreInc(v, vec, 7);
+    v->value += 7;
 
-    val = VectorMap_Get(v, vec);
+    v = VectorMap_Get(vm, vec);
 
-    if (7 != val.value)
+    if (7 != v->value)
     {
-        FAIL("VectorMap setting not working got %d", val.value);
+        FAIL("VectorMap setting not working got %d", v->value);
     }
 }
 
@@ -244,7 +230,5 @@ testAMap(int capacity, int sensitivity)
 void TEST_VectorMap()
 {
     testAMap(10, 1);
-    // testAMap(10, 2);
-    // testAMap(10, 10);
 }
 #endif

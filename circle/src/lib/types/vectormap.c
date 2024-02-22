@@ -101,23 +101,6 @@ void DestroyVectorMap(VectorMap *v)
     free(v);
 }
 
-VectorMap ***NewMatrixOfVectorMap(int vecN, int capacity, int n, int m)
-{
-    VectorMap ***ret = calloc(n, sizeof(VectorMap **));
-    **ret = calloc(n * m, sizeof(VectorMap *));
-
-    for (int i = 0; i < n; i++)
-    {
-        ret[i] = *ret + i * m;
-        for (int j = 0; j < m; j++)
-        {
-            ret[i][j] = NewVectorMap(vecN, capacity, j + 1);
-        }
-    }
-
-    return ret;
-}
-
 void DestroyMatrixOfVectorMap(VectorMap **vm)
 {
     free(*vm);
@@ -175,14 +158,20 @@ VectorValueRef VectorMap_GetRef(VectorMap *vm, Vector vec)
 {
     return getIndex(vm, vec);
 }
-VectorValue VectorMap_GetFromRef(VectorMap *vm, VectorValueRef ref)
+VectorValue *VectorMap_GetFromRef(VectorMap *vm, VectorValueRef ref)
 {
-    return vm->values[ref - 1];
+    return &vm->values[ref - 1];
 }
 
 VectorValue *VectorMap_Get(VectorMap *vm, Vector vec)
 {
     return getValue(vm, vec);
+}
+
+VectorValue *VectorMap_GetValues(VectorMap *vm, int *oNumValues)
+{
+    *oNumValues = vm->nextValue;
+    return vm->values;
 }
 
 #ifdef TEST

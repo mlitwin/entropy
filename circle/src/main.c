@@ -100,6 +100,8 @@ int main(int argc, char *argv[])
     struct Vector_CmpArgs args = {w.n, w.n, 1};
     for (int i = 0; i < w.n; i++)
     {
+        printf("%d\n", i + 1);
+
         args.sensitivity = i + 1;
         qsort_r(w.densities, w.n, sizeof(int), &args, &sortVecCmp);
     }

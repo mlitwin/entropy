@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 static int signum(int a)
 {
@@ -33,6 +34,11 @@ void timestats(struct TimeStats *ts, int *tv, int n)
         }
     }
     ts->center = (center + ts->wt / 2) / ts->wt;
+}
+
+int sortVecCmp(void *thunk, const void *a, const void *b)
+{
+    return Vector_Cmp((struct Vector_CmpArgs *)thunk, (Vector)a, (Vector)b);
 }
 
 int main(int argc, char *argv[])
@@ -70,6 +76,7 @@ int main(int argc, char *argv[])
     {
 
         printf("first %d\n", t);
+#if 0
         for (int i = 0; i < w.n; i++)
         {
             VectorValue *v = VectorMap_Get(w.vm[i], w.densities[w.t]);
@@ -81,6 +88,7 @@ int main(int argc, char *argv[])
                 m[i] = v->value;
             }
         }
+#endif
 
         // PrintWorld(&w);
         if (t != w.n - 1)
@@ -88,6 +96,14 @@ int main(int argc, char *argv[])
             AdvanceWorld(&w);
         }
     }
+
+    struct Vector_CmpArgs args = {w.n, w.n, 1};
+    for (int i = 0; i < w.n; i++)
+    {
+        args.sensitivity = i + 1;
+        qsort_r(w.densities, w.n, sizeof(int), &args, &sortVecCmp);
+    }
+#if 0
     for (int t = 0; t < w.n; t++)
     {
         printf("%d\n", t);
@@ -112,8 +128,9 @@ int main(int argc, char *argv[])
 
     timestats(&ts, tv, w.n);
     printf("(%d, %d): %d %d %d\n", w.precision, w.n, ts.count, ts.wt, ts.center);
+#endif
 
-    DestroyWorld(&w);
+    // DestroyWorld(&w);
 
     return 0;
 }

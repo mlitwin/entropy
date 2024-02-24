@@ -1,11 +1,9 @@
 #pragma once
 
-typedef int *Vector;
+int *NewVector(int n);
+void DestroyVector(int *v);
 
-Vector NewVector(int n);
-void DestroyVector(Vector v);
-
-void PrintVector(const Vector v, int n);
+void PrintVector(const int *v, int n);
 
 #ifdef TEST
 void TEST_Vector();

@@ -38,7 +38,7 @@ void timestats(struct TimeStats *ts, int *tv, int n)
 
 int sortVecCmp(void *thunk, const void *a, const void *b)
 {
-    return Vector_Cmp((struct Vector_CmpArgs *)thunk, (Vector)a, (Vector)b);
+    return Vector_Cmp((struct Vector_CmpArgs *)thunk, (int *)a, (int *)b);
 }
 
 int main(int argc, char *argv[])

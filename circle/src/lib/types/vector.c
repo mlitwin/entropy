@@ -2,17 +2,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-Vector NewVector(int n)
+int *NewVector(int n)
 {
-    Vector v = calloc(n, sizeof(int));
+    int *v = calloc(n, sizeof(int));
     return v;
 }
-void DestroyVector(Vector v)
+void DestroyVector(int *v)
 {
     free(v);
 }
 
-void PrintVector(const Vector v, int n)
+void PrintVector(const int *v, int n)
 {
     for (int i = 0; i < n; i++)
     {

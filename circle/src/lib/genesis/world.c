@@ -9,7 +9,7 @@
 struct densityEntry
 {
     int t;
-    Vector v;
+    int *v;
 };
 
 struct World
@@ -19,7 +19,7 @@ struct World
     int precision;
     int **cur;
     int t;
-    Vector *densities;
+    int **densities;
     int **permutation;
 
     int **next;
@@ -65,7 +65,7 @@ struct World *CreateNeWorld(int n, int v, int precision)
     w->b = (int **)NewMatrix(sizeof(int), v, n);
     w->permutation = (int **)NewMatrix(sizeof(int), v, n);
 
-    w->densities = calloc(sizeof(Vector *), w->n);
+    w->densities = calloc(sizeof(int **), w->n);
     for (int i = 0; i < w->n; i++)
     {
         w->densities[i] = NewVector(w->n);
@@ -134,8 +134,8 @@ static int densityCmp(void *thunk, const void *iA, const void *iB)
     struct World *w = thunk;
     const struct densityEntry *A = iA;
     const struct densityEntry *B = iB;
-    Vector a = A->v;
-    Vector b = B->v;
+    int *a = A->v;
+    int *b = B->v;
 
     int n = w->n;
 

@@ -5,12 +5,6 @@
 #include <stdlib.h>
 #include <strings.h>
 
-struct densityEntry
-{
-    int t;
-    int *v;
-};
-
 struct World
 {
     int n;
@@ -120,6 +114,13 @@ void RunWorld(struct World *w)
     }
 }
 
+struct densityEntry
+{
+    int t;
+    int cohort;
+    int *v;
+};
+
 static int densityCmp(void *thunk, const void *iA, const void *iB)
 {
     struct World *w = thunk;
@@ -155,25 +156,34 @@ static void PrintVector(const int *v, int n)
     printf(")\n");
 }
 
+static void advanceCohorts(struct World *w, struct densityEntry *densities, int *cohorts, int sensitivity)
+{
+    printf("%d\n", sensitivity);
+}
+
 void BeholdWorld(struct World *w)
 {
-    struct densityEntry *densities = calloc(sizeof(struct densityEntry *), w->n);
+    struct densityEntry *densities = calloc(sizeof(struct densityEntry), w->n);
+    int *cohorts = (int *)malloc(sizeof(int) * w->n);
 
     for (int t = 0; t < w->n; t++)
     {
         densities[t].t = t;
         densities[t].v = w->densities[t];
+        cohorts[t] = 1;
     }
 
     printf("\nBehold\n");
 
     qsort_r(densities, w->n, sizeof(struct densityEntry), w, densityCmp);
 
-    for (int t = 0; t < w->n; t++)
+    for (int s = 0; s < w->n; s++)
     {
-        PrintVector(densities[t].v, w->n);
+        advanceCohorts(w, densities, cohorts, s);
+        //  PrintVector(densities[t].v, w->n);
     }
 
+    free(cohorts);
     free(densities);
 }
 

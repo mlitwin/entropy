@@ -1,5 +1,6 @@
 #include "world.h"
 #include "../types/vector.h"
+#include "../types/matrix.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +20,7 @@ struct World
     int **cur;
     int t;
     Vector *densities;
+    int **permutation;
 
     int **next;
     int **a;
@@ -29,11 +31,21 @@ static void declareDarkMaterials(struct World *w)
 {
     for (int j = 0; j < w->v; j++)
     {
+        const int velocity = j - w->v / 2;
+
         for (int i = 0; i < w->n; i++)
         {
+            int nextI = (i + velocity) % w->n;
             const int val = rand() % w->v;
+
             w->cur[j][i] = val;
             w->densities[0][i] += val;
+
+            if (nextI < 0)
+            {
+                nextI += w->n;
+            }
+            w->permutation[j][i] = nextI;
         }
     }
 }
@@ -51,11 +63,14 @@ struct World *CreateNeWorld(int n, int v, int precision)
 
     w->a = (int **)NewMatrix(sizeof(int), v, n);
     w->b = (int **)NewMatrix(sizeof(int), v, n);
+    w->permutation = (int **)NewMatrix(sizeof(int), v, n);
+
     w->densities = calloc(sizeof(Vector *), w->n);
     for (int i = 0; i < w->n; i++)
     {
         w->densities[i] = NewVector(w->n);
     }
+
     w->cur = w->a;
     w->next = w->b;
 
@@ -68,6 +83,7 @@ void DestroyWorld(struct World *w)
 {
     DestroyMatrix((void **)w->a);
     DestroyMatrix((void **)w->b);
+    DestroyMatrix((void **)w->permutation);
     for (int i = 0; i < w->n; i++)
     {
         DestroyVector(w->densities[i]);
@@ -84,15 +100,11 @@ static void AdvanceWorld(struct World *w)
     {
         int *cur_row = w->cur[j];
         int *next_row = w->next[j];
-        const int velocity = j - w->v / 2;
-
-        int nextI = velocity % w->n;
 
         for (int i = 0; i < w->n; i++)
         {
-            int curVal = cur_row[i];
-
-            nextI = (nextI + velocity) % w->n;
+            const int curVal = cur_row[i];
+            const int nextI = w->permutation[j][i];
 
             next_row[nextI] = curVal;
 
@@ -145,6 +157,7 @@ static int densityCmp(void *thunk, const void *iA, const void *iB)
 void BeholdWorld(struct World *w)
 {
     struct densityEntry *densities = calloc(sizeof(struct densityEntry *), w->n);
+
     for (int t = 0; t < w->n; t++)
     {
         densities[t].t = t;
@@ -178,8 +191,10 @@ void PrintWorld(const struct World *w)
 void TEST_World()
 {
     struct World *w;
+    const int n = 100;
+
     srand(1);
-    w = CreateNeWorld(10000, 10000, 1);
+    w = CreateNeWorld(n, 3, 1);
     RunWorld(w);
     BeholdWorld(w);
     DestroyWorld(w);

@@ -3,7 +3,7 @@ MODE ?= RELEASE
 MAIN ?= main
 
 CC = gcc
-CFLAGS = -g -Wall -O0 -std=c99 -I./types -D$(MODE) -Isrc/lib
+CFLAGS = -g -Wall -O3 -std=c99 -I./types -D$(MODE) -Isrc/lib
 LDFLAGS = -lc
 
 OBJDIR=build/objs/$(TARGET)

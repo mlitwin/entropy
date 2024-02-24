@@ -86,14 +86,13 @@ static void AdvanceWorld(struct World *w)
         int *next_row = w->next[j];
         const int velocity = j - w->v / 2;
 
+        int nextI = velocity % w->n;
+
         for (int i = 0; i < w->n; i++)
         {
             int curVal = cur_row[i];
-            int nextI = (i + velocity) % w->n;
-            if (nextI < 0)
-            {
-                nextI += w->n;
-            }
+
+            nextI = (nextI + velocity) % w->n;
 
             next_row[nextI] = curVal;
 
@@ -180,7 +179,7 @@ void TEST_World()
 {
     struct World *w;
     srand(1);
-    w = CreateNeWorld(10, 10, 1);
+    w = CreateNeWorld(10000, 10000, 1);
     RunWorld(w);
     BeholdWorld(w);
     DestroyWorld(w);

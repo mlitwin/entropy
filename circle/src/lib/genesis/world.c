@@ -1,5 +1,4 @@
 #include "world.h"
-#include "../types/vector.h"
 #include "../types/matrix.h"
 
 #include <stdio.h>
@@ -144,6 +143,16 @@ static int densityCmp(void *thunk, const void *iA, const void *iB)
     }
 
     return 0;
+}
+
+static void PrintVector(const int *v, int n)
+{
+    for (int i = 0; i < n; i++)
+    {
+        const char *sep = (i == 0) ? "(" : " ";
+        printf("%s%d", sep, v[i]);
+    }
+    printf(")\n");
 }
 
 void BeholdWorld(struct World *w)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../types/matrix.h"
-#include "../types/vector.h"
 
 struct World;
 

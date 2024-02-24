@@ -1,6 +1,4 @@
 #include "lib/genesis/world.h"
-#include "lib/types/vectormap.h"
-#include "lib/types/vector.h"
 
 #include <stdio.h>
 #include <stdlib.h>

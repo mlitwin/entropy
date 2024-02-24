@@ -65,11 +65,7 @@ struct World *CreateNeWorld(int n, int v, int precision)
     w->b = (int **)NewMatrix(sizeof(int), v, n);
     w->permutation = (int **)NewMatrix(sizeof(int), v, n);
 
-    w->densities = calloc(sizeof(int **), w->n);
-    for (int i = 0; i < w->n; i++)
-    {
-        w->densities[i] = NewVector(w->n);
-    }
+    w->densities = (int **)NewMatrix(sizeof(int), n, n);
 
     w->cur = w->a;
     w->next = w->b;
@@ -84,11 +80,7 @@ void DestroyWorld(struct World *w)
     DestroyMatrix((void **)w->a);
     DestroyMatrix((void **)w->b);
     DestroyMatrix((void **)w->permutation);
-    for (int i = 0; i < w->n; i++)
-    {
-        DestroyVector(w->densities[i]);
-    }
-    free(w->densities);
+    DestroyMatrix((void **)w->densities);
     free(w);
 }
 

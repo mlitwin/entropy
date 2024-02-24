@@ -1,5 +1,6 @@
 #include "vector.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 Vector NewVector(int n)
 {
@@ -11,26 +12,14 @@ void DestroyVector(Vector v)
     free(v);
 }
 
-int Vector_Cmp(struct Vector_CmpArgs *args, const Vector av, const Vector bv)
+void PrintVector(const Vector v, int n)
 {
-    Vector a = av;
-    Vector b = bv;
-
-    int n = args->aLen < args->bLen ? args->aLen : args->bLen;
-
-    while (n != 0)
+    for (int i = 0; i < n; i++)
     {
-        const int diff = (*a) / args->sensitivity - (*b) / args->sensitivity;
-        if (diff != 0)
-        {
-            return diff;
-        }
-        a++;
-        b++;
-        n--;
+        const char *sep = (i == 0) ? "(" : " ";
+        printf("%s%d", sep, v[i]);
     }
-
-    return args->aLen - args->bLen;
+    printf(")\n");
 }
 
 #ifdef TEST

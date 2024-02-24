@@ -22,7 +22,7 @@ void DestroyMatrix(Matrix m)
 
 #ifdef TEST
 #include "test.h"
-void TEST_matrix()
+void TEST_Matrix()
 {
     int **m = (int **)NewMatrix(sizeof(int), 20, 30);
     m[4][7] = 22;

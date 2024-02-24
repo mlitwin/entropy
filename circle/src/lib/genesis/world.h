@@ -1,31 +1,18 @@
 #pragma once
 
 #include "../types/matrix.h"
-#include "../types/vectormap.h"
 #include "../types/vector.h"
 
-typedef struct
-{
-    int n;
-    int v;
-    int precision;
-    int **cur;
-    int t;
-    Vector *densities;
-    VectorMap **vm;
+struct World;
 
-    int **next;
-    int **a;
-    int **b;
-} World;
+struct World *CreateNeWorld(int n, int v, int precision);
 
-void CreateNeWorld(World *w, int n, int v, int precision);
+void DestroyWorld(struct World *w);
 
-void DestroyWorld(World *w);
+void RunWorld(struct World *w);
+void BeholdWorld(struct World *w);
 
-void AdvanceWorld(World *w);
-
-void PrintWorld(const World *w);
+void PrintWorld(const struct World *w);
 
 #ifdef TEST
 void TEST_World();

@@ -5,17 +5,27 @@
 #include <stdlib.h>
 #include <strings.h>
 
-static void incrementVectorMaps(World *w)
+struct densityEntry
 {
-    return;
-    for (int i = 0; i < w->n; i++)
-    {
-        VectorMap_Get(w->vm[i], w->densities[w->t])
-            ->value++;
-    }
-}
+    int t;
+    Vector v;
+};
 
-static void declareDarkMaterials(World *w)
+struct World
+{
+    int n;
+    int v;
+    int precision;
+    int **cur;
+    int t;
+    Vector *densities;
+
+    int **next;
+    int **a;
+    int **b;
+};
+
+static void declareDarkMaterials(struct World *w)
 {
     for (int j = 0; j < w->v; j++)
     {
@@ -26,11 +36,12 @@ static void declareDarkMaterials(World *w)
             w->densities[0][i] += val;
         }
     }
-    incrementVectorMaps(w);
 }
 
-void CreateNeWorld(World *w, int n, int v, int precision)
+struct World *CreateNeWorld(int n, int v, int precision)
 {
+    struct World *w = calloc(sizeof(struct World), 1);
+
     v *= 2;
 
     w->n = n;
@@ -47,16 +58,13 @@ void CreateNeWorld(World *w, int n, int v, int precision)
     }
     w->cur = w->a;
     w->next = w->b;
-    w->vm = calloc(sizeof(VectorMap *), w->n);
-    for (int i = 0; i < w->n; i++)
-    {
-        w->vm[i] = NewVectorMap(n, n, i + 1);
-    }
 
     declareDarkMaterials(w);
+
+    return w;
 }
 
-void DestroyWorld(World *w)
+void DestroyWorld(struct World *w)
 {
     DestroyMatrix((void **)w->a);
     DestroyMatrix((void **)w->b);
@@ -65,9 +73,10 @@ void DestroyWorld(World *w)
         DestroyVector(w->densities[i]);
     }
     free(w->densities);
+    free(w);
 }
 
-void AdvanceWorld(World *w)
+static void AdvanceWorld(struct World *w)
 {
     w->t++;
 
@@ -94,14 +103,68 @@ void AdvanceWorld(World *w)
         }
     }
 
-    incrementVectorMaps(w);
-
     int **tmp = w->cur;
     w->cur = w->next;
     w->next = tmp;
 }
 
-void PrintWorld(const World *w)
+void RunWorld(struct World *w)
+{
+    PrintWorld(w);
+    while (w->t < w->n - 1)
+    {
+        AdvanceWorld(w);
+        PrintWorld(w);
+    }
+}
+
+static int densityCmp(void *thunk, const void *iA, const void *iB)
+{
+    struct World *w = thunk;
+    const struct densityEntry *A = iA;
+    const struct densityEntry *B = iB;
+    Vector a = A->v;
+    Vector b = B->v;
+
+    int n = w->n;
+
+    while (n != 0)
+    {
+        const int diff = (*a) - (*b);
+        if (diff != 0)
+        {
+            return diff;
+        }
+        a++;
+        b++;
+        n--;
+    }
+
+    return 0;
+}
+
+void BeholdWorld(struct World *w)
+{
+    struct densityEntry *densities = calloc(sizeof(struct densityEntry *), w->n);
+    for (int t = 0; t < w->n; t++)
+    {
+        densities[t].t = t;
+        densities[t].v = w->densities[t];
+    }
+
+    printf("\nBehold\n");
+
+    qsort_r(densities, w->n, sizeof(struct densityEntry), w, densityCmp);
+
+    for (int t = 0; t < w->n; t++)
+    {
+        PrintVector(densities[t].v, w->n);
+    }
+
+    free(densities);
+}
+
+void PrintWorld(const struct World *w)
 {
     for (int i = 0; i < w->n; i++)
     {
@@ -115,10 +178,11 @@ void PrintWorld(const World *w)
 #include "test.h"
 void TEST_World()
 {
-    World w;
-    sranddev();
-    CreateNeWorld(&w, 10, 10, 1);
-    AdvanceWorld(&w);
-    DestroyWorld(&w);
+    struct World *w;
+    srand(1);
+    w = CreateNeWorld(10, 10, 1);
+    RunWorld(w);
+    BeholdWorld(w);
+    DestroyWorld(w);
 }
 #endif

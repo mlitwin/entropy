@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#if 0
 static int signum(int a)
 {
     return (0 < a) - (a < 0);
@@ -33,19 +34,18 @@ void timestats(struct TimeStats *ts, int *tv, int n)
     }
     ts->center = (center + ts->wt / 2) / ts->wt;
 }
+#endif
 
-int sortVecCmp(void *thunk, const void *a, const void *b)
+static void usage()
 {
-    return Vector_Cmp((struct Vector_CmpArgs *)thunk, (int *)a, (int *)b);
+    printf("Usage: circle -n space -v velocity\n");
+    exit(-1);
 }
 
 int main(int argc, char *argv[])
 {
-    World w;
-    int *m;
-    int *tv;
-    int n, v, ch;
-    struct TimeStats ts;
+    struct World *w;
+    int n = -1, v = -1, ch;
 
     while ((ch = getopt(argc, argv, "n:v:")) != -1)
     {
@@ -59,78 +59,24 @@ int main(int argc, char *argv[])
             break;
         case '?':
         default:;
-            // usage();
+            usage();
         }
     }
     argc -= optind;
     argv += optind;
 
+    if (n == -1 || v == -1)
+    {
+        usage();
+    }
+
     sranddev();
-    CreateNeWorld(&w, n, v, 1);
-    m = NewVector(w.n);
-    tv = NewVector(w.n);
 
-    for (int t = 0; t < w.n; t++)
-    {
+    w = CreateNeWorld(n, v, 1);
 
-        printf("first %d\n", t);
-#if 0
-        for (int i = 0; i < w.n; i++)
-        {
-            VectorValue *v = VectorMap_Get(w.vm[i], w.densities[w.t]);
-            v->value++;
-            // printf("%d: (%d) d %d\n", t, i, v->value);
-
-            if (t == w.n - 1)
-            {
-                m[i] = v->value;
-            }
-        }
-#endif
-
-        // PrintWorld(&w);
-        if (t != w.n - 1)
-        {
-            AdvanceWorld(&w);
-        }
-    }
-
-    struct Vector_CmpArgs args = {w.n, w.n, 1};
-    for (int i = 0; i < w.n; i++)
-    {
-        printf("%d\n", i + 1);
-
-        args.sensitivity = i + 1;
-        qsort_r(w.densities, w.n, sizeof(int), &args, &sortVecCmp);
-    }
-#if 0
-    for (int t = 0; t < w.n; t++)
-    {
-        printf("%d\n", t);
-
-        for (int i = 0; i < w.n; i++)
-        {
-
-            VectorValue *v = VectorMap_Get(w.vm[i], w.densities[t]);
-            int prev = m[i];
-            int delta = v->value - prev;
-            tv[i] += signum(delta);
-            if (0 != delta)
-            {
-                // printf("%d: (%d) d %d %d %d\n", t, i, delta, prev, v->value);
-            }
-            m[i] = v->value;
-        }
-        // AdvanceWorld(&w);
-
-        //  PrintWorld(&w);
-    }
-
-    timestats(&ts, tv, w.n);
-    printf("(%d, %d): %d %d %d\n", w.precision, w.n, ts.count, ts.wt, ts.center);
-#endif
-
-    // DestroyWorld(&w);
+    RunWorld(w);
+    BeholdWorld(w);
+    DestroyWorld(w);
 
     return 0;
 }

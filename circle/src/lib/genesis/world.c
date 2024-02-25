@@ -106,11 +106,11 @@ static void AdvanceWorld(struct World *w)
 
 void RunWorld(struct World *w)
 {
-    PrintWorld(w);
+    // PrintWorld(w);
     while (w->t < w->n - 1)
     {
         AdvanceWorld(w);
-        PrintWorld(w);
+        //  PrintWorld(w);
     }
 }
 
@@ -156,9 +156,47 @@ static void PrintVector(const int *v, int n)
     printf(")\n");
 }
 
-static void advanceCohorts(struct World *w, struct densityEntry *densities, int *cohorts, int sensitivity)
+static int densityEqual(int *a, int *b, int n, int sensitivity)
 {
-    printf("%d\n", sensitivity);
+    while (n > 0)
+    {
+        if (*(a + n - 1) / sensitivity != *(b + n - 1) / sensitivity)
+        {
+            return 0;
+        }
+        n--;
+    }
+    return 1;
+}
+
+static int advanceCohorts(struct World *w, struct densityEntry *densities, int *cohorts, int sensitivity)
+{
+    int cohort = 0;
+    int cur = 1;
+
+    cohorts[0] = 0;
+
+    while (cur < w->n)
+    {
+        if (!densityEqual(densities[cur].v, densities[cur - 1].v, w->n, sensitivity))
+        {
+            cohort++;
+            cohorts[cohort] = 0;
+        }
+        densities[cur].cohort = cohort;
+        cohorts[cohort]++;
+        cur++;
+    }
+
+    printf("%d: ", sensitivity);
+    for (int i = 0; i < w->n; i++)
+    {
+        printf("%d ", densities[i].cohort);
+    }
+
+    printf("\n");
+
+    return cohort;
 }
 
 void BeholdWorld(struct World *w)

@@ -33,7 +33,13 @@ $(OBJDIR)/.depend: $(DEPS)
 	cat $(DEPS) >> $(OBJDIR)/.depend
 
 $(TARGET) : $(OBJECTS) $(OBJDIR)/$(MAIN).o
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(OBJDIR)/$(MAIN).o $(LDFLAGS)
+	codesign -s - -f --entitlements $(MAIN).entitlements $(TARGET)
+
+$(TARGET) : $(MAIN).entitlements
+
+$(MAIN).entitlements:
+	/usr/libexec/PlistBuddy -c "Add :com.apple.security.get-task-allow bool true" $(MAIN).entitlements
 
 .PHONY: clean test
 

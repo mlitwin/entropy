@@ -169,10 +169,16 @@ static int densityEqual(int *a, int *b, int n, int sensitivity)
     return 1;
 }
 
+static int signum(int a)
+{
+    return (0 < a) - (a < 0);
+}
+
 static int advanceCohorts(struct World *w, struct densityEntry *densities, int *cohorts, int sensitivity)
 {
     int cohort = 0;
     int cur = 1;
+    int timespeed = 0;
 
     cohorts[0] = 1;
 
@@ -188,13 +194,18 @@ static int advanceCohorts(struct World *w, struct densityEntry *densities, int *
         cur++;
     }
 
-    printf("%d: ", sensitivity);
-    for (int i = 0; i <= cohort; i++)
+    for (int i = 0; i <= w->n; i++)
     {
-        printf("%d ", cohorts[i]);
+        int next = (i + 1) % w->n;
+        int delta = signum(cohorts[densities[i].cohort] - cohorts[densities[next].cohort]);
+        timespeed += delta;
+        // printf("%d ", cohorts[i]);
     }
 
-    printf("\n");
+    if (timespeed != 0)
+    {
+        printf("%d: %d\n", sensitivity, timespeed);
+    }
 
     return cohort;
 }

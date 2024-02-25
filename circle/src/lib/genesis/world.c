@@ -178,7 +178,6 @@ static int advanceCohorts(struct World *w, struct densityEntry *densities, int *
 {
     int cohort = 0;
     int cur = 1;
-    int timespeed = 0;
 
     cohorts[0] = 1;
 
@@ -194,25 +193,32 @@ static int advanceCohorts(struct World *w, struct densityEntry *densities, int *
         cur++;
     }
 
+    return cohort;
+}
+
+static int ComputeTimeVelocity(const struct World *w, const struct densityEntry *densities, const int *densityIndex, const int *cohorts)
+{
+    int timespeed = 0;
+
     for (int i = 0; i < w->n; i++)
     {
         int next = (i + 1) % w->n;
-        int delta = signum(cohorts[densities[i].cohort] - cohorts[densities[next].cohort]);
+        int curIndex = densityIndex[i];
+        int nextIndex = densityIndex[next];
+
+        int delta = signum(cohorts[densities[curIndex].cohort] - cohorts[densities[nextIndex].cohort]);
         timespeed += delta;
         // printf("%d ", cohorts[i]);
     }
 
-    if (timespeed != 0)
-    {
-        printf("%d: %d\n", sensitivity, timespeed);
-    }
-
-    return cohort;
+    return timespeed;
 }
 
 void BeholdWorld(struct World *w)
 {
     struct densityEntry *densities = calloc(sizeof(struct densityEntry), w->n);
+    int *densityIndex = (int *)malloc(sizeof(int) * w->n);
+
     int *cohorts = (int *)malloc(sizeof(int) * w->n);
 
     for (int t = 0; t < w->n; t++)
@@ -225,13 +231,24 @@ void BeholdWorld(struct World *w)
     printf("\nBehold\n");
 
     qsort_r(densities, w->n, sizeof(struct densityEntry), w, densityCmp);
+    for (int i = 0; i < w->n; i++)
+    {
+        densityIndex[densities[i].t] = i;
+    }
 
     for (int s = 1; s < w->n; s++)
     {
         int c = advanceCohorts(w, densities, cohorts, s);
+        int timespeed;
         if (c == 0)
         {
             break;
+        }
+        timespeed = ComputeTimeVelocity(w, densities, densityIndex, cohorts);
+
+        if (timespeed != 0)
+        {
+            printf("%d: %d\n", s, timespeed);
         }
     }
 
@@ -254,7 +271,7 @@ void PrintWorld(const struct World *w)
 void TEST_World()
 {
     struct World *w;
-    const int n = 10000;
+    const int n = 500;
 
     srand(1);
     w = CreateNeWorld(n, 3, 1);

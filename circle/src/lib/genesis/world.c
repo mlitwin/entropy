@@ -174,7 +174,7 @@ static int advanceCohorts(struct World *w, struct densityEntry *densities, int *
     int cohort = 0;
     int cur = 1;
 
-    cohorts[0] = 0;
+    cohorts[0] = 1;
 
     while (cur < w->n)
     {
@@ -189,9 +189,9 @@ static int advanceCohorts(struct World *w, struct densityEntry *densities, int *
     }
 
     printf("%d: ", sensitivity);
-    for (int i = 0; i < w->n; i++)
+    for (int i = 0; i <= cohort; i++)
     {
-        printf("%d ", densities[i].cohort);
+        printf("%d ", cohorts[i]);
     }
 
     printf("\n");
@@ -215,10 +215,13 @@ void BeholdWorld(struct World *w)
 
     qsort_r(densities, w->n, sizeof(struct densityEntry), w, densityCmp);
 
-    for (int s = 0; s < w->n; s++)
+    for (int s = 1; s < w->n; s++)
     {
-        advanceCohorts(w, densities, cohorts, s);
-        //  PrintVector(densities[t].v, w->n);
+        int c = advanceCohorts(w, densities, cohorts, s);
+        if (c == 0)
+        {
+            break;
+        }
     }
 
     free(cohorts);
@@ -240,7 +243,7 @@ void PrintWorld(const struct World *w)
 void TEST_World()
 {
     struct World *w;
-    const int n = 100;
+    const int n = 10000;
 
     srand(1);
     w = CreateNeWorld(n, 3, 1);

@@ -38,16 +38,16 @@ void timestats(struct TimeStats *ts, int *tv, int n)
 
 static void usage()
 {
-    printf("Usage: circle -n space -v velocity\n");
+    printf("Usage: circle -n space -v velocity [-p precision]\n");
     exit(-1);
 }
 
 int main(int argc, char *argv[])
 {
     struct World *w;
-    int n = -1, v = -1, ch;
+    int n = -1, v = -1, p = 1, ch;
 
-    while ((ch = getopt(argc, argv, "n:v:")) != -1)
+    while ((ch = getopt(argc, argv, "n:v:p:")) != -1)
     {
         switch (ch)
         {
@@ -56,6 +56,9 @@ int main(int argc, char *argv[])
             break;
         case 'v':
             v = atoi(optarg);
+            break;
+        case 'p':
+            p = atoi(optarg);
             break;
         case '?':
         default:;
@@ -72,7 +75,7 @@ int main(int argc, char *argv[])
 
     sranddev();
 
-    w = CreateNeWorld(n, v, 1);
+    w = CreateNeWorld(n, v, p);
 
     RunWorld(w);
     BeholdWorld(w);

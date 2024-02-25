@@ -194,7 +194,7 @@ static int advanceCohorts(struct World *w, struct densityEntry *densities, int *
         cur++;
     }
 
-    for (int i = 0; i <= w->n; i++)
+    for (int i = 0; i < w->n; i++)
     {
         int next = (i + 1) % w->n;
         int delta = signum(cohorts[densities[i].cohort] - cohorts[densities[next].cohort]);

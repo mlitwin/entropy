@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 const loader = new THREE.TextureLoader();
-const img = loader.load(import.meta.env.BASE_URL + "/x.jpg");
+const img = loader.load(import.meta.env.BASE_URL + "x.jpg");
 const material_one = new THREE.MeshPhongMaterial();
 material_one.color = new THREE.Color(0xffffff);
 material_one.map = img;

@@ -1,6 +1,6 @@
 module.exports = {
+  base: "https://mlitwin.github.io/entropy/",
   build: {
     outDir: "../docs",
-    base: "https://mlitwin.github.io/entropy/",
   },
 };

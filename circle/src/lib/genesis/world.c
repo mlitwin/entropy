@@ -13,6 +13,7 @@ struct World
     int **cur;
     int t;
     int **densities;
+    int **probabilities;
     int **permutation;
 
     int **next;
@@ -59,6 +60,7 @@ struct World *CreateNeWorld(int n, int v, int precision)
     w->permutation = (int **)NewMatrix(sizeof(int), v, n);
 
     w->densities = (int **)NewMatrix(sizeof(int), n, n);
+    w->probabilities = (int **)NewMatrix(sizeof(int), n, n);
 
     w->cur = w->a;
     w->next = w->b;
@@ -70,10 +72,11 @@ struct World *CreateNeWorld(int n, int v, int precision)
 
 void DestroyWorld(struct World *w)
 {
-    DestroyMatrix((void **)w->a);
-    DestroyMatrix((void **)w->b);
-    DestroyMatrix((void **)w->permutation);
+    DestroyMatrix((void **)w->probabilities);
     DestroyMatrix((void **)w->densities);
+    DestroyMatrix((void **)w->permutation);
+    DestroyMatrix((void **)w->b);
+    DestroyMatrix((void **)w->a);
     free(w);
 }
 
@@ -106,11 +109,9 @@ static void AdvanceWorld(struct World *w)
 
 void RunWorld(struct World *w)
 {
-    // PrintWorld(w);
     while (w->t < w->n - 1)
     {
         AdvanceWorld(w);
-        //  PrintWorld(w);
     }
 }
 
@@ -144,16 +145,6 @@ static int densityCmp(void *thunk, const void *iA, const void *iB)
     }
 
     return 0;
-}
-
-static void PrintVector(const int *v, int n)
-{
-    for (int i = 0; i < n; i++)
-    {
-        const char *sep = (i == 0) ? "(" : " ";
-        printf("%s%d", sep, v[i]);
-    }
-    printf(")\n");
 }
 
 static int densityEqual(int *a, int *b, int n, int sensitivity)
@@ -196,6 +187,7 @@ static int advanceCohorts(struct World *w, struct densityEntry *densities, int *
     return cohort;
 }
 
+#if 0
 static int ComputeTimeVelocity(const struct World *w, const struct densityEntry *densities, const int *densityIndex, const int *cohorts)
 {
     int timespeed = 0;
@@ -213,6 +205,7 @@ static int ComputeTimeVelocity(const struct World *w, const struct densityEntry 
 
     return timespeed;
 }
+#endif
 
 void BeholdWorld(struct World *w)
 {
@@ -226,9 +219,11 @@ void BeholdWorld(struct World *w)
         densities[t].t = t;
         densities[t].v = w->densities[t];
         cohorts[t] = 1;
+        for (int i = 0; i < w->n; i++)
+        {
+            w->probabilities[t][i] = w->n; /* default */
+        }
     }
-
-    printf("\nBehold\n");
 
     qsort_r(densities, w->n, sizeof(struct densityEntry), w, densityCmp);
     for (int i = 0; i < w->n; i++)
@@ -239,16 +234,13 @@ void BeholdWorld(struct World *w)
     for (int s = 1; s < w->n; s++)
     {
         int c = advanceCohorts(w, densities, cohorts, s);
-        int timespeed;
         if (c == 0)
         {
             break;
         }
-        timespeed = ComputeTimeVelocity(w, densities, densityIndex, cohorts);
-
-        if (timespeed != 0)
+        for (int t = 0; t < w->n; t++)
         {
-            printf("%d: %d\n", s, timespeed);
+            w->probabilities[t][s - 1] = cohorts[densities[t].cohort];
         }
     }
 
@@ -258,12 +250,23 @@ void BeholdWorld(struct World *w)
 
 void PrintWorld(const struct World *w)
 {
-    for (int i = 0; i < w->n; i++)
+    for (int t = 0; t < w->n; t++)
     {
-        const char *sep = (i == 0) ? "(" : " ";
-        printf("%s%d", sep, w->densities[w->t][i]);
+
+        for (int i = 0; i < w->n; i++)
+        {
+            const char *sep = i == 0 ? "" : " ";
+            printf("%s%d", sep, w->densities[t][i]);
+        }
+        printf("\n");
+
+        for (int s = 0; s < w->n; s++)
+        {
+            const char *sep = s == 0 ? "" : " ";
+            printf("%s%d", sep, w->probabilities[t][s]);
+        }
+        printf("\n");
     }
-    printf(")\n");
 }
 
 #ifdef TEST

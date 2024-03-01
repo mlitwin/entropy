@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 
     RunWorld(w);
     BeholdWorld(w);
+    PrintWorld(w);
     DestroyWorld(w);
 
     return 0;

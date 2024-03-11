@@ -21,7 +21,7 @@ struct World
     int **b;
 };
 
-static void declareDarkMaterials(struct World *w)
+static void ordainDarkMaterials(struct World *w)
 {
     for (int j = 0; j < w->v; j++)
     {
@@ -65,7 +65,7 @@ struct World *CreateNeWorld(int n, int v, int precision)
     w->cur = w->a;
     w->next = w->b;
 
-    declareDarkMaterials(w);
+    ordainDarkMaterials(w);
 
     return w;
 }
@@ -160,11 +160,6 @@ static int densityEqual(int *a, int *b, int n, int sensitivity)
     return 1;
 }
 
-static int signum(int a)
-{
-    return (0 < a) - (a < 0);
-}
-
 static int advanceCohorts(struct World *w, struct densityEntry *densities, int *cohorts, int sensitivity)
 {
     int cohort = 0;
@@ -186,26 +181,6 @@ static int advanceCohorts(struct World *w, struct densityEntry *densities, int *
 
     return cohort;
 }
-
-#if 0
-static int ComputeTimeVelocity(const struct World *w, const struct densityEntry *densities, const int *densityIndex, const int *cohorts)
-{
-    int timespeed = 0;
-
-    for (int i = 0; i < w->n; i++)
-    {
-        int next = (i + 1) % w->n;
-        int curIndex = densityIndex[i];
-        int nextIndex = densityIndex[next];
-
-        int delta = signum(cohorts[densities[curIndex].cohort] - cohorts[densities[nextIndex].cohort]);
-        timespeed += delta;
-        // printf("%d ", cohorts[i]);
-    }
-
-    return timespeed;
-}
-#endif
 
 void BeholdWorld(struct World *w)
 {
@@ -250,6 +225,7 @@ void BeholdWorld(struct World *w)
 
 void PrintWorld(const struct World *w)
 {
+    printf("%d %d %d\n", w->n, w->v, w->precision);
     for (int t = 0; t < w->n; t++)
     {
 
@@ -259,7 +235,9 @@ void PrintWorld(const struct World *w)
             printf("%s%d", sep, w->densities[t][i]);
         }
         printf("\n");
-
+    }
+    for (int t = 0; t < w->n; t++)
+    {
         for (int s = 0; s < w->n; s++)
         {
             const char *sep = s == 0 ? "" : " ";

@@ -5,37 +5,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#if 0
-static int signum(int a)
-{
-    return (0 < a) - (a < 0);
-}
-
-struct TimeStats
-{
-    int count;
-    int wt;
-    int center;
-};
-
-void timestats(struct TimeStats *ts, int *tv, int n)
-{
-    int center = 0;
-    ts->count = 0;
-    ts->wt = 0;
-    for (int i = 0; i < n; i++)
-    {
-        center += i * abs(tv[i]);
-        ts->wt += abs(tv[i]);
-        if (tv[i] != 0)
-        {
-            ts->count++;
-        }
-    }
-    ts->center = (center + ts->wt / 2) / ts->wt;
-}
-#endif
-
 static void usage()
 {
     printf("Usage: circle -n space -v velocity [-p precision]\n");

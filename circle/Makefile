@@ -49,7 +49,7 @@ test:
 
 process:
 	make TARGET=runprocess MODE=PROCESS MAIN=process_main
-	./runprocess < test.txt
+	./runprocess world < test.txt
 
 clean:
 	@rm -rf $(TARGET) build/objs/*

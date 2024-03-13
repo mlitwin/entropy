@@ -8,8 +8,8 @@
 
 static void usage()
 {
-    printf("Usage: circle -n space -v velocity [-p precision]\n");
-    exit(-1);
+    fprintf(stderr, "Usage: processes -p <path> <directory_name>\n");
+    exit(EXIT_FAILURE);
 }
 
 static void GetLine(const char **oLine)
@@ -91,13 +91,53 @@ static void outputMesh(struct WorldSpec *w, int sensitivity, int size)
     }
 }
 
+static int parse_args(int argc, char *argv[])
+{
+    int opt;
+    char *path = NULL;
+    char *dirname = NULL;
+
+    while ((opt = getopt(argc, argv, "p:")) != -1)
+    {
+        switch (opt)
+        {
+        case 'p':
+            path = optarg;
+            break;
+        default:
+            usage();
+        }
+    }
+
+    // Check if path is provided
+    if (path != NULL)
+    {
+        if (chdir(path) != 0)
+        {
+            fprintf(stderr, "Could not chdir to %s\n", path);
+            exit(EXIT_FAILURE);
+        };
+    }
+
+    // Get the directory name
+    if (optind >= argc)
+    {
+        fprintf(stderr, "Directory name must be provided.\n");
+        usage();
+    }
+
+    return optind;
+}
+
 int main(int argc, char *argv[])
 {
+
     struct WorldSpec w;
 
     const int size = 1024;
     const char *l;
     json_stream *stream = Create_JSON_Stream(stdout);
+    int optind = parse_args(argc, argv);
 
     GetLine(&l);
     sscanf(l, "%d %d %d", &w.n, &w.v, &w.p);

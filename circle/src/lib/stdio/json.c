@@ -39,6 +39,7 @@ static void stack_node_push(struct json_stack_node **node, enum json_stack_type 
 static void stack_node_pop(struct json_stack_node **node)
 {
     struct json_stack_node *next = (*node)->next;
+
     free(*node);
 
     *node = next;
@@ -88,10 +89,9 @@ static int string_print(json_stream *restrict stream, const char *string)
     return ret;
 }
 
-static int indent_print(json_stream *restrict stream)
+static int indent_print(json_stream *restrict stream, int indent)
 {
     int ret = 0;
-    int indent = 2 * stream->node->depth;
 
     while (indent > 0)
     {
@@ -105,13 +105,18 @@ static int indent_print(json_stream *restrict stream)
 static int print_prefix(json_stream *restrict stream, enum json_operation op)
 {
     int ret = 0;
+    int depth = stream->node->depth;
     if ((op != JSON_OBJECT_END) && (op != JSON_ARRAY_END))
     {
         if (stream->node->count > 0)
             ret += fprintf(stream->file, ",\n");
     }
+    else
+    {
+        depth--;
+    }
 
-    ret += indent_print(stream);
+    ret += indent_print(stream, 2 * depth);
 
     return ret;
 }
@@ -127,7 +132,6 @@ static int value_print(json_stream *restrict stream, enum json_operation op, va_
         ret += fprintf(stream->file, "{\n");
         break;
     case JSON_OBJECT_END:
-        ret += fprintf(stream->file, "\n");
         ret += fprintf(stream->file, "}\n");
         stack_node_pop(&stream->node);
         stream->node->count++;
@@ -138,7 +142,7 @@ static int value_print(json_stream *restrict stream, enum json_operation op, va_
         stack_node_push(&stream->node, JSON_STACK_TYPE_ARRAY);
         break;
     case JSON_ARRAY_END:
-        ret += fprintf(stream->file, "\n]\n");
+        ret += fprintf(stream->file, "]\n");
         stack_node_pop(&stream->node);
         stream->node->count++;
         break;
@@ -159,7 +163,6 @@ static int value_print(json_stream *restrict stream, enum json_operation op, va_
     case JSON_NUMBER:
     {
         double v = va_arg(args, double);
-        // ret += printf("%*.g", 17, v);
         ret += fprintf(stream->file, "%.*g", 17, v);
         stream->node->count++;
     }

@@ -148,7 +148,13 @@ int main(int argc, char *argv[])
     kv_jfprintf(stream, "n", JSON_INT, w.n);
     kv_jfprintf(stream, "v", JSON_INT, w.v);
     kv_jfprintf(stream, "p", JSON_INT, w.p);
-    kv_jfprintf(stream, "level", JSON_ARRAY_START);
+    kv_jfprintf(stream, "levels", JSON_ARRAY_START);
+    for (int level = 1; level <= 1; level++)
+    {
+        jfprintf(stream, JSON_OBJECT_START);
+        kv_jfprintf(stream, "level", JSON_INT, level);
+        jfprintf(stream, JSON_OBJECT_END);
+    }
     jfprintf(stream, JSON_ARRAY_END);
     jfprintf(stream, JSON_OBJECT_END);
 

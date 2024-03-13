@@ -109,10 +109,14 @@ static int print_prefix(json_stream *restrict stream, enum json_operation op)
     if ((op != JSON_OBJECT_END) && (op != JSON_ARRAY_END))
     {
         if (stream->node->count > 0)
-            ret += fprintf(stream->file, ",\n");
+        {
+            ret += fprintf(stream->file, ",");
+            ret += fprintf(stream->file, "%s", stream->node->type == JSON_STACK_TYPE_OBJECT ? "\n" : " ");
+        }
     }
     else
     {
+        ret += fprintf(stream->file, "\n");
         depth--;
     }
 
@@ -132,7 +136,7 @@ static int value_print(json_stream *restrict stream, enum json_operation op, va_
         ret += fprintf(stream->file, "{\n");
         break;
     case JSON_OBJECT_END:
-        ret += fprintf(stream->file, "}\n");
+        ret += fprintf(stream->file, "}");
         stack_node_pop(&stream->node);
         stream->node->count++;
 
@@ -142,7 +146,7 @@ static int value_print(json_stream *restrict stream, enum json_operation op, va_
         stack_node_push(&stream->node, JSON_STACK_TYPE_ARRAY);
         break;
     case JSON_ARRAY_END:
-        ret += fprintf(stream->file, "]\n");
+        ret += fprintf(stream->file, "]");
         stack_node_pop(&stream->node);
         stream->node->count++;
         break;

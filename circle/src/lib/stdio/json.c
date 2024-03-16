@@ -106,12 +106,21 @@ static int print_prefix(json_stream *restrict stream, enum json_operation op)
 {
     int ret = 0;
     int depth = stream->node->depth;
+    int do_indent = 1;
     if ((op != JSON_OBJECT_END) && (op != JSON_ARRAY_END))
     {
         if (stream->node->count > 0)
         {
             ret += fprintf(stream->file, ",");
-            ret += fprintf(stream->file, "%s", stream->node->type == JSON_STACK_TYPE_OBJECT ? "\n" : " ");
+            if (stream->node->type == JSON_STACK_TYPE_OBJECT)
+            {
+                ret += fprintf(stream->file, "\n");
+            }
+            else
+            {
+                ret += fprintf(stream->file, " ");
+                do_indent = 0;
+            }
         }
     }
     else
@@ -120,7 +129,8 @@ static int print_prefix(json_stream *restrict stream, enum json_operation op)
         depth--;
     }
 
-    ret += indent_print(stream, 2 * depth);
+    if (do_indent)
+        ret += indent_print(stream, 2 * depth);
 
     return ret;
 }

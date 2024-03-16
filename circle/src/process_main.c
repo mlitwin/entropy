@@ -5,11 +5,23 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <errno.h>
 
 static void usage()
 {
-    fprintf(stderr, "Usage: processes -p <path> <directory_name>\n");
+    fprintf(stderr, "Usage: processes [-d <directory_name>] name\n");
     exit(EXIT_FAILURE);
+}
+
+static FILE *openFile(const char *filename, const char *mode)
+{
+    FILE *file = fopen(filename, mode);
+    if (!file)
+    {
+        fprintf(stderr, "Could not open %s for %s error code %d\n", filename, mode, errno);
+    }
+    return file;
 }
 
 static void GetLine(const char **oLine)
@@ -71,55 +83,68 @@ static int meshDensity(struct WorldSpec *w, int sensitivity, int i0, int j0, int
         {
             const int i1 = (i0 + i) % w->n;
             const int j1 = (j0 + j) % w->n;
-            sum += w->density[i1][j1];
+            sum += w->density[i1][j1] / sensitivity;
         }
     }
 
     return sum;
 }
 
-static void outputMesh(struct WorldSpec *w, int sensitivity, int size)
+static void outputMesh(struct WorldSpec *w, int sensitivity, int size, const char *outputFileName)
 {
     const int grain = w->n / size;
+    FILE *outfile = openFile(outputFileName, "w");
+
+    json_stream *stream = Create_JSON_Stream(outfile);
+
+    jfprintf(stream, JSON_OBJECT_START);
+    kv_jfprintf(stream, "d", JSON_ARRAY_START);
     for (int i = 0; i < size; i++)
     {
+        jfprintf(stream, JSON_ARRAY_START);
+
         for (int j = 0; j < size; j++)
         {
             const int d = meshDensity(w, sensitivity, i, j, grain);
-            printf("%d\n", d);
+            jfprintf(stream, JSON_INT, d);
         }
+
+        jfprintf(stream, JSON_ARRAY_END);
     }
+    jfprintf(stream, JSON_ARRAY_END);
+
+    jfprintf(stream, JSON_OBJECT_END);
+
+    Destroy_JSON_Stream(stream);
+    fclose(outfile);
 }
 
 static int parse_args(int argc, char *argv[])
 {
     int opt;
-    char *path = NULL;
     char *dirname = NULL;
 
     while ((opt = getopt(argc, argv, "p:")) != -1)
     {
         switch (opt)
         {
-        case 'p':
-            path = optarg;
+        case 'd':
+            dirname = optarg;
             break;
         default:
             usage();
         }
     }
 
-    // Check if path is provided
-    if (path != NULL)
+    if (dirname != NULL)
     {
-        if (chdir(path) != 0)
+        if (chdir(dirname) != 0)
         {
-            fprintf(stderr, "Could not chdir to %s\n", path);
+            fprintf(stderr, "Could not chdir to %s\n", dirname);
             exit(EXIT_FAILURE);
         };
     }
 
-    // Get the directory name
     if (optind >= argc)
     {
         fprintf(stderr, "Directory name must be provided.\n");
@@ -135,9 +160,14 @@ int main(int argc, char *argv[])
     struct WorldSpec w;
 
     const int size = 1024;
+    // const int size = 2;
     const char *l;
-    json_stream *stream = Create_JSON_Stream(stdout);
     int optind = parse_args(argc, argv);
+    const char *name = argv[optind];
+    char indexFilePath[PATH_MAX];
+    sprintf(indexFilePath, "%s.json", name);
+    FILE *indexFile = openFile(indexFilePath, "w");
+    json_stream *stream = Create_JSON_Stream(indexFile);
 
     GetLine(&l);
     sscanf(l, "%d %d %d", &w.n, &w.v, &w.p);
@@ -149,29 +179,37 @@ int main(int argc, char *argv[])
     kv_jfprintf(stream, "v", JSON_INT, w.v);
     kv_jfprintf(stream, "p", JSON_INT, w.p);
     kv_jfprintf(stream, "levels", JSON_ARRAY_START);
-    for (int level = 1; level <= 1; level++)
+    for (int level = 1; level <= size; level++)
     {
+        char levelFile[PATH_MAX];
+        sprintf(levelFile, "%s/level_%d.json", name, level);
+
         jfprintf(stream, JSON_OBJECT_START);
         kv_jfprintf(stream, "level", JSON_INT, level);
+        kv_jfprintf(stream, "file", JSON_STRING, levelFile);
         jfprintf(stream, JSON_OBJECT_END);
     }
     jfprintf(stream, JSON_ARRAY_END);
     jfprintf(stream, JSON_OBJECT_END);
+    fclose(indexFile);
+    Destroy_JSON_Stream(stream);
 
-#if 0
-    printf("%d %d %d\n", w.n, w.v, w.p);
-    printf("%d\n", w.density[7][7]);
-    printf("%d\n", w.prob[7][7]);
+    for (int level = 1; level <= size; level++)
+    {
+        char levelFile[PATH_MAX];
+        sprintf(levelFile, "%s/level_%d.json", name, level);
 
+        printf("\33[2K\r");
+        printf("%d/%d", level, size);
+        fflush(stdout);
 
-    outputMesh(&w, 1, size);
-#endif
+        outputMesh(&w, level, size, levelFile);
+    }
 
     DestroyMatrix((void **)w.density);
     DestroyMatrix((void **)w.prob);
 
     GetLine(NULL);
 
-    Destroy_JSON_Stream(stream);
     return 0;
 }

@@ -74,25 +74,38 @@ struct WorldSpec
     int **prob;
 };
 
-static int meshDensity(struct WorldSpec *w, int sensitivity, int i0, int j0, int grain)
+static void meshDensities(struct WorldSpec *w, int size, int i0, int j0, int grain, int ***meshes)
 {
-    int sum = 0;
     for (int i = 0; i < grain; i++)
     {
         for (int j = 0; j < grain; j++)
         {
             const int i1 = (i0 + i) % w->n;
             const int j1 = (j0 + j) % w->n;
-            sum += w->density[i1][j1] / sensitivity;
+            const int d = w->density[i1][j1];
+            for (int sensitivity = 1; sensitivity <= size; sensitivity++)
+            {
+                meshes[sensitivity - 1][i0][j0] += d / sensitivity;
+            }
         }
     }
-
-    return sum;
 }
 
-static void outputMesh(struct WorldSpec *w, int sensitivity, int size, const char *outputFileName)
+static void computeMeshes(struct WorldSpec *w, int size, int ***meshes)
 {
     const int grain = w->n / size;
+
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            meshDensities(w, size, i, j, grain, meshes);
+        }
+    }
+}
+
+static void outputMesh(struct WorldSpec *w, int **mesh, int size, const char *outputFileName)
+{
     FILE *outfile = openFile(outputFileName, "w");
 
     json_stream *stream = Create_JSON_Stream(outfile);
@@ -105,8 +118,7 @@ static void outputMesh(struct WorldSpec *w, int sensitivity, int size, const cha
 
         for (int j = 0; j < size; j++)
         {
-            const int d = meshDensity(w, sensitivity, i, j, grain);
-            jfprintf(stream, JSON_INT, d);
+            jfprintf(stream, JSON_INT, mesh[i][j]);
         }
 
         jfprintf(stream, JSON_ARRAY_END);
@@ -168,6 +180,7 @@ int main(int argc, char *argv[])
     sprintf(indexFilePath, "%s.json", name);
     FILE *indexFile = openFile(indexFilePath, "w");
     json_stream *stream = Create_JSON_Stream(indexFile);
+    int ***meshes = malloc(sizeof(int ***) * size);
 
     GetLine(&l);
     sscanf(l, "%d %d %d", &w.n, &w.v, &w.p);
@@ -183,6 +196,7 @@ int main(int argc, char *argv[])
     {
         char levelFile[PATH_MAX];
         sprintf(levelFile, "%s/level_%d.json", name, level);
+        meshes[level - 1] = (int **)NewMatrix(sizeof(int), size, size);
 
         jfprintf(stream, JSON_OBJECT_START);
         kv_jfprintf(stream, "level", JSON_INT, level);
@@ -194,8 +208,11 @@ int main(int argc, char *argv[])
     fclose(indexFile);
     Destroy_JSON_Stream(stream);
 
+    computeMeshes(&w, size, meshes);
+
     for (int level = 1; level <= size; level++)
     {
+
         char levelFile[PATH_MAX];
         sprintf(levelFile, "%s/level_%d.json", name, level);
 
@@ -203,9 +220,10 @@ int main(int argc, char *argv[])
         printf("%d/%d", level, size);
         fflush(stdout);
 
-        outputMesh(&w, level, size, levelFile);
+        outputMesh(&w, meshes[level - 1], size, levelFile);
+        DestroyMatrix((void **)meshes[level - 1]);
     }
-
+    free(meshes);
     DestroyMatrix((void **)w.density);
     DestroyMatrix((void **)w.prob);
 

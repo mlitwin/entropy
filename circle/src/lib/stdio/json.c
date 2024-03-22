@@ -216,6 +216,7 @@ int kv_jfprintf(json_stream *restrict stream, const char *key, enum json_operati
 
 #ifdef TEST
 #include "test.h"
+#include "string.h"
 
 #define OUTPUT_BUFLEN (1024 * 32)
 
@@ -225,6 +226,10 @@ void TEST_JSON()
 
     FILE *mem = fmemopen(buf, OUTPUT_BUFLEN, "w");
     json_stream *stream = Create_JSON_Stream(mem);
+    const char *expected = "{\n"
+                           "  \"text\": \"te\\\"st\",\n"
+                           "  \"number\": 1.2345600000000001\n"
+                           "}";
 
     jfprintf(stream, JSON_OBJECT_START);
     kv_jfprintf(stream, "text", JSON_STRING, "te\"st");
@@ -235,6 +240,9 @@ void TEST_JSON()
     Destroy_JSON_Stream(stream);
     fclose(mem);
 
-    printf("%s", buf);
+    if (0 != strcmp(buf, expected))
+    {
+        FAIL("Incorrect JSON output '%s' expected '%s'", buf, expected);
+    }
 }
 #endif

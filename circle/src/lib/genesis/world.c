@@ -123,19 +123,27 @@ struct densityEntry
     int *v;
 };
 
-static int densityCmp(void *thunk, const void *iA, const void *iB)
+struct densitySortThunk
 {
-    struct World *w = thunk;
+    int n;
+    int sensitivity;
+};
+
+static int
+densityCmp(void *thunk, const void *iA, const void *iB)
+{
+    struct densitySortThunk *w = thunk;
     const struct densityEntry *A = iA;
     const struct densityEntry *B = iB;
     int *a = A->v;
     int *b = B->v;
 
     int n = w->n;
+    const int sensitivity = w->sensitivity;
 
     while (n != 0)
     {
-        const int diff = (*a) - (*b);
+        const int diff = (*a) / sensitivity - (*b) / sensitivity;
         if (diff != 0)
         {
             return diff;
@@ -187,8 +195,8 @@ void BeholdWorld(struct World *w)
 {
     struct densityEntry *densities = calloc(sizeof(struct densityEntry), w->n);
     int *densityIndex = (int *)malloc(sizeof(int) * w->n);
-
     int *cohorts = (int *)malloc(sizeof(int) * w->n);
+    struct densitySortThunk sortThunk;
 
     for (int t = 0; t < w->n; t++)
     {
@@ -201,7 +209,9 @@ void BeholdWorld(struct World *w)
         }
     }
 
-    qsort_r(densities, w->n, sizeof(struct densityEntry), w, densityCmp);
+    sortThunk.n = w->n;
+    sortThunk.sensitivity = 1;
+    qsort_r(densities, w->n, sizeof(struct densityEntry), &sortThunk, densityCmp);
     for (int i = 0; i < w->n; i++)
     {
         densityIndex[densities[i].t] = i;
@@ -209,7 +219,11 @@ void BeholdWorld(struct World *w)
 
     for (int s = 1; s < w->n; s++)
     {
-        int c = advanceCohorts(w, densities, cohorts, s);
+        int c;
+        sortThunk.sensitivity = s;
+        qsort_r(densities, w->n, sizeof(struct densityEntry), &sortThunk, densityCmp);
+
+        c = advanceCohorts(w, densities, cohorts, s);
         if (c == 0)
         {
             break;

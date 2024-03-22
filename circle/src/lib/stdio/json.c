@@ -19,7 +19,7 @@ struct json_stack_node
 {
     enum json_stack_type type;
     int depth;
-    int count;
+    long count;
     struct json_stack_node *next;
 };
 

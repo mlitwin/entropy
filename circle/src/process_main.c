@@ -136,7 +136,7 @@ static int parse_args(int argc, char *argv[])
     int opt;
     char *dirname = NULL;
 
-    while ((opt = getopt(argc, argv, "p:")) != -1)
+    while ((opt = getopt(argc, argv, "d:")) != -1)
     {
         switch (opt)
         {
@@ -191,6 +191,8 @@ int main(int argc, char *argv[])
     kv_jfprintf(stream, "n", JSON_INT, w.n);
     kv_jfprintf(stream, "v", JSON_INT, w.v);
     kv_jfprintf(stream, "p", JSON_INT, w.p);
+    kv_jfprintf(stream, "width", JSON_INT, size);
+    kv_jfprintf(stream, "height", JSON_INT, size);
     kv_jfprintf(stream, "levels", JSON_ARRAY_START);
     for (int level = 1; level <= size; level++)
     {
@@ -212,7 +214,6 @@ int main(int argc, char *argv[])
 
     for (int level = 1; level <= size; level++)
     {
-
         char levelFile[PATH_MAX];
         sprintf(levelFile, "%s/level_%d.json", name, level);
 

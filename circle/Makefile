@@ -3,7 +3,7 @@ MODE ?= RELEASE
 MAIN ?= main
 
 CC = gcc
-CFLAGS = -g -Wall -O0 -std=c99 -I./types -D$(MODE) -Isrc/lib
+CFLAGS = -g -Wall -O0 -Wpadded -std=c99 -I./types -D$(MODE) -Isrc/lib
 LDFLAGS = -lc
 
 OBJDIR=build/objs/$(TARGET)
@@ -49,8 +49,8 @@ test:
 
 process:
 	make TARGET=runprocess MODE=PROCESS MAIN=process_main
-#	./runprocess world -d ../visualize/public < test.txt
-	./runprocess world  < test.txt
+	./runprocess -d ../visualize/public world < test.txt
+#	./runprocess world  < test.txt
 
 clean:
 	@rm -rf $(TARGET) build/objs/*

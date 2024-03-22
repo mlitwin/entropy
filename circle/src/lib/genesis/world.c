@@ -10,8 +10,9 @@ struct World
     int n;
     int v;
     int precision;
-    int **cur;
     int t;
+
+    int **cur;
     int **densities;
     int **probabilities;
     int **permutation;

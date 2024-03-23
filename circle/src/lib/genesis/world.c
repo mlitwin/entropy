@@ -15,6 +15,7 @@ struct World
     int **cur;
     int **densities;
     int **probabilities;
+    int **cohorts;
     int **permutation;
 
     int **next;
@@ -61,6 +62,7 @@ struct World *CreateNeWorld(int n, int v, int precision)
     w->permutation = (int **)NewMatrix(sizeof(int), v, n);
 
     w->densities = (int **)NewMatrix(sizeof(int), n, n);
+    w->cohorts = (int **)NewMatrix(sizeof(int), n, n);
     w->probabilities = (int **)NewMatrix(sizeof(int), n, n);
 
     w->cur = w->a;
@@ -74,6 +76,7 @@ struct World *CreateNeWorld(int n, int v, int precision)
 void DestroyWorld(struct World *w)
 {
     DestroyMatrix((void **)w->probabilities);
+    DestroyMatrix((void **)w->cohorts);
     DestroyMatrix((void **)w->densities);
     DestroyMatrix((void **)w->permutation);
     DestroyMatrix((void **)w->b);
@@ -169,22 +172,23 @@ static int densityEqual(int *a, int *b, int n, int sensitivity)
     return 1;
 }
 
-static int advanceCohorts(struct World *w, struct densityEntry *densities, int *cohorts, int sensitivity)
+static int computeCohorts(struct World *w, struct densityEntry *densities, int *cohort_counts, int sensitivity)
 {
     int cohort = 0;
     int cur = 1;
 
-    cohorts[0] = 1;
+    cohort_counts[0] = 1;
+    densities[0].cohort = cohort;
 
     while (cur < w->n)
     {
         if (!densityEqual(densities[cur].v, densities[cur - 1].v, w->n, sensitivity))
         {
             cohort++;
-            cohorts[cohort] = 0;
+            cohort_counts[cohort] = 0;
         }
         densities[cur].cohort = cohort;
-        cohorts[cohort]++;
+        cohort_counts[cohort]++;
         cur++;
     }
 
@@ -194,47 +198,34 @@ static int advanceCohorts(struct World *w, struct densityEntry *densities, int *
 void BeholdWorld(struct World *w)
 {
     struct densityEntry *densities = calloc(sizeof(struct densityEntry), w->n);
-    int *densityIndex = (int *)malloc(sizeof(int) * w->n);
-    int *cohorts = (int *)malloc(sizeof(int) * w->n);
+    int *cohort_counts = (int *)calloc(sizeof(int), w->n);
     struct densitySortThunk sortThunk;
 
     for (int t = 0; t < w->n; t++)
     {
         densities[t].t = t;
         densities[t].v = w->densities[t];
-        cohorts[t] = 1;
-        for (int i = 0; i < w->n; i++)
+        for (int s = 0; s < w->n; s++)
         {
-            w->probabilities[t][i] = w->n; /* default */
+            w->probabilities[s][t] = w->n; /* default */
         }
     }
 
     sortThunk.n = w->n;
-    sortThunk.sensitivity = 1;
-    qsort_r(densities, w->n, sizeof(struct densityEntry), &sortThunk, densityCmp);
-    for (int i = 0; i < w->n; i++)
-    {
-        densityIndex[densities[i].t] = i;
-    }
-
     for (int s = 1; s < w->n; s++)
     {
-        int c;
         sortThunk.sensitivity = s;
         qsort_r(densities, w->n, sizeof(struct densityEntry), &sortThunk, densityCmp);
 
-        c = advanceCohorts(w, densities, cohorts, s);
-        if (c == 0)
-        {
-            break;
-        }
+        computeCohorts(w, densities, cohort_counts, s);
         for (int t = 0; t < w->n; t++)
         {
-            w->probabilities[t][s - 1] = cohorts[densities[t].cohort];
+            w->probabilities[s - 1][t] = cohort_counts[densities[t].cohort];
+            w->cohorts[s - 1][t] = densities[t].cohort;
         }
     }
 
-    free(cohorts);
+    free(cohort_counts);
     free(densities);
 }
 
@@ -256,7 +247,17 @@ void PrintWorld(const struct World *w)
         for (int s = 0; s < w->n; s++)
         {
             const char *sep = s == 0 ? "" : " ";
-            printf("%s%d", sep, w->probabilities[t][s]);
+            printf("%s%d", sep, w->probabilities[s][t]);
+        }
+        printf("\n");
+    }
+
+    for (int t = 0; t < w->n; t++)
+    {
+        for (int s = 0; s < w->n; s++)
+        {
+            const char *sep = s == 0 ? "" : " ";
+            printf("%s%d", sep, w->cohorts[s][t]);
         }
         printf("\n");
     }

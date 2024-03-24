@@ -1,20 +1,20 @@
 #include "matrix.h"
 #include <stdlib.h>
 
-Matrix NewMatrix(int size, int n, int m)
+void **NewMatrix(int size, int m, int n)
 {
-    void **ret = calloc(n, sizeof(void *));
-    *ret = calloc(size, n * m);
+    void **ret = calloc(m, sizeof(void *));
+    *ret = calloc(size, m * n);
 
-    for (int j = 0; j < n; j++)
+    for (int j = 0; j < m; j++)
     {
-        ret[j] = (char *)(*ret) + j * size * m;
+        ret[j] = (char *)(*ret) + j * size * n;
     }
 
     return ret;
 }
 
-void DestroyMatrix(Matrix m)
+void DestroyMatrix(void **m)
 {
     free(*(char **)m);
     free((void *)m);

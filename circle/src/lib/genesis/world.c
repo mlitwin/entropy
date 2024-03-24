@@ -8,6 +8,7 @@
 struct World
 {
     int n;
+    int max_v;
     int v;
     int precision;
     int t;
@@ -50,9 +51,9 @@ struct World *CreateNeWorld(int n, int v, int precision)
 {
     struct World *w = calloc(sizeof(struct World), 1);
 
-    v *= 2;
-
     w->n = n;
+    w->max_v = v;
+    v = 2 * v;
     w->v = v;
     w->t = 0;
     w->precision = precision;
@@ -229,38 +230,25 @@ void BeholdWorld(struct World *w)
     free(densities);
 }
 
+static void printMatrix(int **mat, int m, int n)
+{
+    for (int t = 0; t < m; t++)
+    {
+        for (int s = 0; s < n; s++)
+        {
+            const char *sep = s == 0 ? "" : " ";
+            printf("%s%d", sep, mat[s][t]);
+        }
+        printf("\n");
+    }
+}
+
 void PrintWorld(const struct World *w)
 {
     printf("%d %d %d\n", w->n, w->v, w->precision);
-    for (int t = 0; t < w->n; t++)
-    {
-
-        for (int i = 0; i < w->n; i++)
-        {
-            const char *sep = i == 0 ? "" : " ";
-            printf("%s%d", sep, w->densities[t][i]);
-        }
-        printf("\n");
-    }
-    for (int t = 0; t < w->n; t++)
-    {
-        for (int s = 0; s < w->n; s++)
-        {
-            const char *sep = s == 0 ? "" : " ";
-            printf("%s%d", sep, w->probabilities[s][t]);
-        }
-        printf("\n");
-    }
-
-    for (int t = 0; t < w->n; t++)
-    {
-        for (int s = 0; s < w->n; s++)
-        {
-            const char *sep = s == 0 ? "" : " ";
-            printf("%s%d", sep, w->cohorts[s][t]);
-        }
-        printf("\n");
-    }
+    printMatrix(w->densities, w->n, w->n);
+    printMatrix(w->cohorts, w->n, w->n);
+    printMatrix(w->probabilities, w->n, w->n);
 }
 
 #ifdef TEST

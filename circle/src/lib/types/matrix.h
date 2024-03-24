@@ -1,9 +1,7 @@
 #pragma once
 
-typedef void **Matrix;
-
-Matrix NewMatrix(int size, int n, int m);
-void DestroyMatrix(Matrix m);
+void **NewMatrix(int size, int n, int m);
+void DestroyMatrix(void **m);
 
 #ifdef TEST
 void TEST_Matrix();

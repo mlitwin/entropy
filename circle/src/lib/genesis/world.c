@@ -7,12 +7,8 @@
 
 struct World
 {
-    int n;
-    int period;
-    int v;
-    int density;
-    int precision;
-    int sensitivity;
+    struct WorldSpec s;
+
     int num_v;
 
     int t;
@@ -34,17 +30,17 @@ static void ordainDarkMaterials(struct World *w)
     {
         const int velocity = j - (w->num_v - 1) / 2;
 
-        for (int i = 0; i < w->n; i++)
+        for (int i = 0; i < w->s.n; i++)
         {
-            int nextI = (i + velocity) % w->n;
-            const int val = rand() % w->density;
+            int nextI = (i + velocity) % w->s.n;
+            const int val = rand() % w->s.density;
 
             w->cur[j][i] = val;
             w->densities[0][i] += val;
 
             if (nextI < 0)
             {
-                nextI += w->n;
+                nextI += w->s.n;
             }
             w->permutation[j][i] = nextI;
         }
@@ -55,19 +51,19 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
 {
     struct World *w = calloc(sizeof(struct World), 1);
 
-    w->n = n;
-    w->period = n;
-    w->precision = precision;
+    w->s.n = n;
+    w->s.period = n;
+    w->s.precision = precision;
     w->num_v = 2 * v + 1;
-    w->v = v;
-    w->density = density;
+    w->s.v = v;
+    w->s.density = density;
     w->t = 0;
 
     w->a = (int **)NewMatrix(sizeof(int), w->num_v, n);
     w->b = (int **)NewMatrix(sizeof(int), w->num_v, n);
     w->permutation = (int **)NewMatrix(sizeof(int), w->num_v, n);
 
-    w->densities = (int **)NewMatrix(sizeof(int), w->period, n);
+    w->densities = (int **)NewMatrix(sizeof(int), w->s.period, n);
 
     w->cur = w->a;
     w->next = w->b;
@@ -97,14 +93,14 @@ static void AdvanceWorld(struct World *w)
         int *cur_row = w->cur[j];
         int *next_row = w->next[j];
 
-        for (int i = 0; i < w->n; i++)
+        for (int i = 0; i < w->s.n; i++)
         {
             const int curVal = cur_row[i];
             const int nextI = w->permutation[j][i];
 
             next_row[nextI] = curVal;
 
-            w->densities[w->t][nextI / w->precision] += curVal;
+            w->densities[w->t][nextI / w->s.precision] += curVal;
 
             cur_row[i] = 0;
         }
@@ -117,7 +113,7 @@ static void AdvanceWorld(struct World *w)
 
 void RunWorld(struct World *w)
 {
-    while (w->t < w->n - 1)
+    while (w->t < w->s.n - 1)
     {
         AdvanceWorld(w);
     }
@@ -139,14 +135,14 @@ struct densitySortThunk
 static int
 densityCmp(void *thunk, const void *iA, const void *iB)
 {
-    struct densitySortThunk *w = thunk;
+    struct densitySortThunk *ds = thunk;
     const struct densityEntry *A = iA;
     const struct densityEntry *B = iB;
     int *a = A->v;
     int *b = B->v;
 
-    int n = w->n;
-    const int sensitivity = w->sensitivity;
+    int n = ds->n;
+    const int sensitivity = ds->sensitivity;
 
     while (n != 0)
     {
@@ -184,9 +180,9 @@ static int computeCohorts(struct World *w, struct densityEntry *densities, int *
     cohort_counts[0] = 1;
     densities[0].cohort = cohort;
 
-    while (cur < w->period)
+    while (cur < w->s.period)
     {
-        if (!densityEqual(densities[cur].v, densities[cur - 1].v, w->n, sensitivity))
+        if (!densityEqual(densities[cur].v, densities[cur - 1].v, w->s.n, sensitivity))
         {
             cohort++;
             cohort_counts[cohort] = 1;
@@ -202,10 +198,10 @@ static int computeCohorts(struct World *w, struct densityEntry *densities, int *
 static int maxDensity(struct World *w)
 {
     int d = 0;
-    for (int t = 0; t < w->period; t++)
+    for (int t = 0; t < w->s.period; t++)
     {
         const int *v = w->densities[t];
-        for (int i = 0; i < w->n; i++)
+        for (int i = 0; i < w->s.n; i++)
         {
             const int val = v[i];
             if (d < val)
@@ -219,29 +215,29 @@ static int maxDensity(struct World *w)
 
 void BeholdWorld(struct World *w)
 {
-    struct densityEntry *densities = calloc(sizeof(struct densityEntry), w->period);
-    int *cohort_counts = (int *)calloc(sizeof(int), w->n);
+    struct densityEntry *densities = calloc(sizeof(struct densityEntry), w->s.period);
+    int *cohort_counts = (int *)calloc(sizeof(int), w->s.n);
     struct densitySortThunk sortThunk;
 
-    w->sensitivity = maxDensity(w) + 1;
+    w->s.sensitivity = maxDensity(w) + 1;
 
-    w->cohorts = (int **)NewMatrix(sizeof(int), w->sensitivity, w->n);
-    w->probabilities = (int **)NewMatrix(sizeof(int), w->sensitivity, w->n);
+    w->cohorts = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
+    w->probabilities = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
 
-    for (int t = 0; t < w->period; t++)
+    for (int t = 0; t < w->s.period; t++)
     {
         densities[t].t = t;
         densities[t].v = w->densities[t];
     }
 
-    sortThunk.n = w->n;
-    for (int s = 0; s < w->sensitivity; s++)
+    sortThunk.n = w->s.n;
+    for (int s = 0; s < w->s.sensitivity; s++)
     {
         sortThunk.sensitivity = s + 1;
-        qsort_r(densities, w->period, sizeof(struct densityEntry), &sortThunk, densityCmp);
+        qsort_r(densities, w->s.period, sizeof(struct densityEntry), &sortThunk, densityCmp);
 
         computeCohorts(w, densities, cohort_counts, s + 1);
-        for (int i = 0; i < w->period; i++)
+        for (int i = 0; i < w->s.period; i++)
         {
             const int t = densities[i].t;
             w->cohorts[s][t] = densities[i].cohort;
@@ -269,13 +265,13 @@ static void printMatrix(int **mat, int m, int n)
 void PrintWorld(const struct World *w)
 {
     printf("# n v density precision sensitivity\n");
-    printf("%d %d %d %d %d\n", w->n, w->v, w->density, w->precision, w->sensitivity);
-    printf("# densities %dx%d\n", w->n, w->n);
-    printMatrix(w->densities, w->n, w->n);
-    printf("# cohorts %dx%d\n", w->sensitivity, w->n);
-    printMatrix(w->cohorts, w->sensitivity, w->n);
-    printf("# probabilities %dx%d\n", w->sensitivity, w->n);
-    printMatrix(w->probabilities, w->sensitivity, w->n);
+    printf("%d %d %d %d %d\n", w->s.n, w->s.v, w->s.density, w->s.precision, w->s.sensitivity);
+    printf("# densities %dx%d\n", w->s.period, w->s.n);
+    printMatrix(w->densities, w->s.period, w->s.n);
+    printf("# cohorts %dx%d\n", w->s.sensitivity, w->s.n);
+    printMatrix(w->cohorts, w->s.sensitivity, w->s.n);
+    printf("# probabilities %dx%d\n", w->s.sensitivity, w->s.n);
+    printMatrix(w->probabilities, w->s.sensitivity, w->s.n);
 }
 
 #ifdef TEST

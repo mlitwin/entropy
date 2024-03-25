@@ -2,6 +2,16 @@
 
 #include "../types/matrix.h"
 
+struct WorldSpec
+{
+    int n;
+    int period;
+    int v;
+    int density;
+    int precision;
+    int sensitivity;
+};
+
 struct World;
 
 struct World *CreateNeWorld(int n, int v, int density, int precision);

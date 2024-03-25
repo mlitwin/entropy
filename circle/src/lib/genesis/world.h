@@ -4,7 +4,7 @@
 
 struct World;
 
-struct World *CreateNeWorld(int n, int v, int precision);
+struct World *CreateNeWorld(int n, int v, int density, int precision);
 
 void DestroyWorld(struct World *w);
 

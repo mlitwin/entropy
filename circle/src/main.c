@@ -16,12 +16,16 @@ int main(int argc, char *argv[])
 {
     struct World *w;
     int n = -1, v = -1, d = -1, p = 1, ch;
+    char *outdir = NULL;
+    char *outname = NULL;
 
     static struct option longopts[] = {
         {"space", required_argument, NULL, 'n'},
         {"max_velocity", required_argument, NULL, 'v'},
         {"density_range", required_argument, NULL, 'd'},
         {"precision", required_argument, NULL, 'p'},
+        {"outdir", required_argument, NULL, 1},
+        {"outname", required_argument, NULL, 2},
         {NULL, 0, NULL, 0}};
 
     while ((ch = getopt_long(argc, argv, "n:v:d:p:", longopts, NULL)) != -1)
@@ -39,6 +43,12 @@ int main(int argc, char *argv[])
             break;
         case 'p':
             p = atoi(optarg);
+            break;
+        case 1:
+            outdir = optarg;
+            break;
+        case 2:
+            outname = optarg;
             break;
         case '?':
         default:;
@@ -64,6 +74,9 @@ int main(int argc, char *argv[])
     RunWorld(w);
     BeholdWorld(w);
     PrintWorld(w);
+    if (outname)
+    {
+    }
     DestroyWorld(w);
 
     return 0;

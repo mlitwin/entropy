@@ -37,13 +37,20 @@ static void GetLine(const char **oLine)
         return;
     }
 
-    linelen = getline(&line, &linecap, stdin);
-    if (linelen == 0)
+    while (1)
     {
-        fprintf(stderr, "Expected content at line %d\n", index);
-        exit(-1);
+        linelen = getline(&line, &linecap, stdin);
+        if (linelen == -1)
+        {
+            fprintf(stderr, "Expected content at line %d\n", index);
+            exit(-1);
+        }
+        index++;
+        if (linelen > 0 && line[0] != '#')
+        {
+            break;
+        }
     }
-    index++;
     *oLine = line;
 }
 
@@ -69,6 +76,9 @@ struct WorldSpec
 {
     int n;
     int v;
+    int density;
+    int precision;
+    int sensitivity;
     int p;
     int **density;
     int **prob;
@@ -183,14 +193,14 @@ int main(int argc, char *argv[])
     int ***meshes = malloc(sizeof(int ***) * size);
 
     GetLine(&l);
-    sscanf(l, "%d %d %d", &w.n, &w.v, &w.p);
+    // n v density precision sensitivity
+    sscanf(l, "%d %d %d", &w.n, &w.v, &w.density, &w.precision, &w.sensitivity);
 
-    w.density = ReadMatrix(w.n);
-    w.prob = ReadMatrix(w.n);
+    w.density = ReadMatrix(w.n, w.n);
+    w.prob = ReadMatrix(&w.sensitivity, w.n);
     jfprintf(stream, JSON_OBJECT_START);
     kv_jfprintf(stream, "n", JSON_INT, w.n);
     kv_jfprintf(stream, "v", JSON_INT, w.v);
-    kv_jfprintf(stream, "p", JSON_INT, w.p);
     kv_jfprintf(stream, "width", JSON_INT, size);
     kv_jfprintf(stream, "height", JSON_INT, size);
     kv_jfprintf(stream, "levels", JSON_ARRAY_START);

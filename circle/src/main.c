@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <getopt.h>
 
 static void usage()
 {
@@ -16,7 +17,14 @@ int main(int argc, char *argv[])
     struct World *w;
     int n = -1, v = -1, d = -1, p = 1, ch;
 
-    while ((ch = getopt(argc, argv, "n:v:d:p:")) != -1)
+    static struct option longopts[] = {
+        {"space", required_argument, NULL, 'n'},
+        {"max_velocity", required_argument, NULL, 'v'},
+        {"density_range", required_argument, NULL, 'd'},
+        {"precision", required_argument, NULL, 'p'},
+        {NULL, 0, NULL, 0}};
+
+    while ((ch = getopt_long(argc, argv, "n:v:d:p:", longopts, NULL)) != -1)
     {
         switch (ch)
         {

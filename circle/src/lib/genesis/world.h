@@ -12,6 +12,13 @@ struct WorldSpec
     int sensitivity;
 };
 
+struct WorldView
+{
+    int **densities;
+    int **probabilities;
+    int **cohorts;
+};
+
 struct World;
 
 struct World *CreateNeWorld(int n, int v, int density, int precision);

@@ -8,15 +8,13 @@
 struct World
 {
     struct WorldSpec s;
+    struct WorldView v;
 
     int num_v;
 
     int t;
 
     int **cur;
-    int **densities;
-    int **probabilities;
-    int **cohorts;
     int **permutation;
 
     int **next;
@@ -36,7 +34,7 @@ static void ordainDarkMaterials(struct World *w)
             const int val = rand() % w->s.density;
 
             w->cur[j][i] = val;
-            w->densities[0][i] += val;
+            w->v.densities[0][i] += val;
 
             if (nextI < 0)
             {
@@ -63,7 +61,7 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
     w->b = (int **)NewMatrix(sizeof(int), w->num_v, n);
     w->permutation = (int **)NewMatrix(sizeof(int), w->num_v, n);
 
-    w->densities = (int **)NewMatrix(sizeof(int), w->s.period, n);
+    w->v.densities = (int **)NewMatrix(sizeof(int), w->s.period, n);
 
     w->cur = w->a;
     w->next = w->b;
@@ -75,9 +73,9 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
 
 void DestroyWorld(struct World *w)
 {
-    DestroyMatrix((void **)w->probabilities);
-    DestroyMatrix((void **)w->cohorts);
-    DestroyMatrix((void **)w->densities);
+    DestroyMatrix((void **)w->v.probabilities);
+    DestroyMatrix((void **)w->v.cohorts);
+    DestroyMatrix((void **)w->v.densities);
     DestroyMatrix((void **)w->permutation);
     DestroyMatrix((void **)w->b);
     DestroyMatrix((void **)w->a);
@@ -100,7 +98,7 @@ static void AdvanceWorld(struct World *w)
 
             next_row[nextI] = curVal;
 
-            w->densities[w->t][nextI / w->s.precision] += curVal;
+            w->v.densities[w->t][nextI / w->s.precision] += curVal;
 
             cur_row[i] = 0;
         }
@@ -200,7 +198,7 @@ static int maxDensity(struct World *w)
     int d = 0;
     for (int t = 0; t < w->s.period; t++)
     {
-        const int *v = w->densities[t];
+        const int *v = w->v.densities[t];
         for (int i = 0; i < w->s.n; i++)
         {
             const int val = v[i];
@@ -221,13 +219,13 @@ void BeholdWorld(struct World *w)
 
     w->s.sensitivity = maxDensity(w) + 1;
 
-    w->cohorts = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
-    w->probabilities = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
+    w->v.cohorts = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
+    w->v.probabilities = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
 
     for (int t = 0; t < w->s.period; t++)
     {
         densities[t].t = t;
-        densities[t].v = w->densities[t];
+        densities[t].v = w->v.densities[t];
     }
 
     sortThunk.n = w->s.n;
@@ -240,8 +238,8 @@ void BeholdWorld(struct World *w)
         for (int i = 0; i < w->s.period; i++)
         {
             const int t = densities[i].t;
-            w->cohorts[s][t] = densities[i].cohort;
-            w->probabilities[s][t] = cohort_counts[densities[i].cohort];
+            w->v.cohorts[s][t] = densities[i].cohort;
+            w->v.probabilities[s][t] = cohort_counts[densities[i].cohort];
         }
     }
 
@@ -267,11 +265,11 @@ void PrintWorld(const struct World *w)
     printf("# n v density precision sensitivity\n");
     printf("%d %d %d %d %d\n", w->s.n, w->s.v, w->s.density, w->s.precision, w->s.sensitivity);
     printf("# densities %dx%d\n", w->s.period, w->s.n);
-    printMatrix(w->densities, w->s.period, w->s.n);
+    printMatrix(w->v.densities, w->s.period, w->s.n);
     printf("# cohorts %dx%d\n", w->s.sensitivity, w->s.n);
-    printMatrix(w->cohorts, w->s.sensitivity, w->s.n);
+    printMatrix(w->v.cohorts, w->s.sensitivity, w->s.n);
     printf("# probabilities %dx%d\n", w->s.sensitivity, w->s.n);
-    printMatrix(w->probabilities, w->s.sensitivity, w->s.n);
+    printMatrix(w->v.probabilities, w->s.sensitivity, w->s.n);
 }
 
 #ifdef TEST

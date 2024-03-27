@@ -5,23 +5,6 @@
 #include <stdlib.h>
 #include <strings.h>
 
-struct World
-{
-    struct WorldSpec s;
-    struct WorldView v;
-
-    int num_v;
-
-    int t;
-
-    int **cur;
-    int **permutation;
-
-    int **next;
-    int **a;
-    int **b;
-};
-
 static void ordainDarkMaterials(struct World *w)
 {
     for (int j = 0; j < w->num_v; j++)

@@ -1,10 +1,10 @@
-#include "lib/genesis/world.h"
-
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <getopt.h>
+
+#include "lib/genesis/world.h"
+#include "lib/genesis/trace_world.h"
 
 static void usage()
 {
@@ -73,9 +73,13 @@ int main(int argc, char *argv[])
 
     RunWorld(w);
     BeholdWorld(w);
-    PrintWorld(w);
     if (outname)
     {
+        Trace_World(&w->s, &w->v, outname, outdir);
+    }
+    else
+    {
+        PrintWorld(w);
     }
     DestroyWorld(w);
 

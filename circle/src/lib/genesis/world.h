@@ -19,6 +19,23 @@ struct WorldView
     int **cohorts;
 };
 
+struct World
+{
+    struct WorldSpec s;
+    struct WorldView v;
+
+    int num_v;
+
+    int t;
+
+    int **cur;
+    int **permutation;
+
+    int **next;
+    int **a;
+    int **b;
+};
+
 struct World;
 
 struct World *CreateNeWorld(int n, int v, int density, int precision);

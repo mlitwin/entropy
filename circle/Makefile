@@ -41,16 +41,11 @@ $(TARGET) : $(MAIN).entitlements
 $(MAIN).entitlements:
 	/usr/libexec/PlistBuddy -c "Add :com.apple.security.get-task-allow bool true" $(MAIN).entitlements
 
-.PHONY: clean test process
+.PHONY: clean test
 
 test:
 	make TARGET=runtest MODE=TEST MAIN=test
 	./runtest
-
-process:
-	make TARGET=runprocess MODE=PROCESS MAIN=process_main
-	./runprocess -d ../visualize/public world < test.txt
-#	./runprocess world  < test.txt
 
 clean:
 	@rm -rf $(TARGET) build/objs/*

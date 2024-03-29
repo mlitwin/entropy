@@ -18,3 +18,7 @@ Simulate - calculate probability space (it's periodic), and find time-asymmetric
 ## Simulation
 
 ./circle -n 2000 -v 30 -p 1
+
+## Visualization
+
+https://mlitwin.github.io/entropy/

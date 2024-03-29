@@ -32,33 +32,33 @@ openFile(const char *filename, const char *mode)
     return file;
 }
 
-static void meshDensities(struct W w, int size, int i0, int j0, int grain, int ***meshes)
-{
-    for (int i = 0; i < grain; i++)
-    {
-        for (int j = 0; j < grain; j++)
-        {
-            const int i1 = (i0 + i) % w.s->n;
-            const int j1 = (j0 + j) % w.s->n;
-            const int d = w.v->densities[i1][j1];
-            for (int sensitivity = 1; sensitivity <= size; sensitivity++)
-            {
-                meshes[sensitivity - 1][i0][j0] += d / sensitivity;
-            }
-        }
-    }
-}
-
 static void computeMeshes(struct W w, int size, int ***meshes)
 {
-    const int grain = (w.s->n + size - 1) / size;
+    const int grain = w.s->n / size;
+    const int n = ((w.s->n + (grain - 1)) / grain) * grain;
+    const int m = ((w.s->period + (grain - 1)) / grain) * grain;
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < n; i++)
     {
-        for (int j = 0; j < size; j++)
+        const int i0 = i % w.s->n;
+        const int i_mesh = i / grain;
+        reportStatus("Computing Meshes", i, n);
+
+        for (int j = 0; j < m; j++)
         {
-            reportStatus("Computing", i * size + j, size * size);
-            meshDensities(w, size, i, j, grain, meshes);
+            const int j0 = j % w.s->period;
+
+            const int d = w.v->densities[i0][j0];
+            const int j_mesh = j / grain;
+            for (int s = 0; s < w.s->sensitivity; s++)
+            {
+                const int v = d / (s + 1);
+                if (v == 0)
+                {
+                    break;
+                }
+                meshes[s][i_mesh][j_mesh] += v;
+            }
         }
     }
 }

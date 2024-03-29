@@ -34,14 +34,15 @@ openFile(const char *filename, const char *mode)
 
 static void computeMeshes(struct W w, int size, int ***meshes)
 {
-    const int grain = (w.s->n + size - 1) / size;
-    const int n = ((w.s->n + (grain - 1)) / grain) * grain;
-    const int m = ((w.s->period + (grain - 1)) / grain) * grain;
+    const int grain_n = (w.s->n + size - 1) / size;
+    const int n = grain_n * size;
+    const int grain_m = (w.s->period + size - 1) / size;
+    const int m = grain_m * size;
 
     for (int i = 0; i < n; i++)
     {
         const int i0 = i % w.s->n;
-        const int i_mesh = i / grain;
+        const int i_mesh = i / grain_n;
         reportStatus("Computing Meshes", i, n);
 
         for (int j = 0; j < m; j++)
@@ -49,7 +50,7 @@ static void computeMeshes(struct W w, int size, int ***meshes)
             const int j0 = j % w.s->period;
 
             const int d = w.v->densities[i0][j0];
-            const int j_mesh = j / grain;
+            const int j_mesh = j / grain_m;
             for (int s = 0; s < w.s->sensitivity; s++)
             {
                 const int v = d / (s + 1);

@@ -79,6 +79,6 @@ animate();
 
 const worldNum = Math.floor(world.levels.length / 2);
 // 900 950
-const entry = world.levels[1];
+const entry = world.levels[0];
 const data = await getFile(entry.file);
 await loadLevel(data, entry.level, world.width, world.height);

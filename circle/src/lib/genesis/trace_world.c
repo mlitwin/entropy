@@ -93,6 +93,7 @@ static void outputMesh(struct W w, int **mesh, int size, const char *outputFileN
 void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, const char *dir)
 {
     const int size = 1024;
+    const int levels = ws->sensitivity;
     struct W w = {ws, wv};
     char filePath[PATH_MAX];
 
@@ -116,11 +117,11 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
     kv_jfprintf(stream, "width", JSON_INT, size);
     kv_jfprintf(stream, "height", JSON_INT, size);
     kv_jfprintf(stream, "levels", JSON_ARRAY_START);
-    for (int level = 1; level <= size; level++)
+    for (int level = 0; level < levels; level++)
     {
         char levelFile[PATH_MAX];
         sprintf(levelFile, "%s/level_%d.json", name, level);
-        meshes[level - 1] = (int **)NewMatrix(sizeof(int), size, size);
+        meshes[level] = (int **)NewMatrix(sizeof(int), size, size);
 
         jfprintf(stream, JSON_OBJECT_START);
         kv_jfprintf(stream, "level", JSON_INT, level);
@@ -134,15 +135,15 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
 
     computeMeshes(w, size, meshes);
 
-    for (int level = 1; level <= size; level++)
+    for (int level = 0; level < levels; level++)
     {
         char levelFile[PATH_MAX];
         sprintf(levelFile, "%s/level_%d.json", name, level);
 
-        reportStatus("Writing", level, size);
+        reportStatus("Writing", level, levels);
 
-        outputMesh(w, meshes[level - 1], size, levelFile);
-        DestroyMatrix((void **)meshes[level - 1]);
+        outputMesh(w, meshes[level], size, levelFile);
+        DestroyMatrix((void **)meshes[level]);
     }
     free(meshes);
 }

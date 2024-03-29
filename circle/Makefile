@@ -1,10 +1,12 @@
 TARGET ?= circle
 MODE ?= RELEASE
 MAIN ?= main
+#PROFILE=-fprofile-instr-generate -fcoverage-mapping
+PROFILE=
 
 CC = gcc
-CFLAGS = -g -Wall -O0 -Wpadded -std=c99 -I./types -D$(MODE) -Isrc/lib
-LDFLAGS = -lc
+CFLAGS = $(PROFILE) -g -Wall -O0 -Wpadded -std=c99 -I./types -D$(MODE) -Isrc/lib
+LDFLAGS = -lc $(PROFILE)
 
 OBJDIR=build/objs/$(TARGET)
 

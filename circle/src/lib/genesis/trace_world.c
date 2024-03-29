@@ -34,7 +34,7 @@ openFile(const char *filename, const char *mode)
 
 static void computeMeshes(struct W w, int size, int ***meshes)
 {
-    const int grain = w.s->n / size;
+    const int grain = (w.s->n + size - 1) / size;
     const int n = ((w.s->n + (grain - 1)) / grain) * grain;
     const int m = ((w.s->period + (grain - 1)) / grain) * grain;
 

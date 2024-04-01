@@ -1,3 +1,6 @@
+import "../scss/styles.scss";
+import * as bootstrap from "bootstrap";
+import { createWorld } from "./world";
 import * as THREE from "three";
 
 async function getFile(file) {
@@ -14,8 +17,9 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+const container = document.getElementById("world");
+renderer.setSize(container.scrollWidth, container.scrollHeight);
+container.appendChild(renderer.domElement);
 
 camera.position.x = 0;
 camera.position.y = 0;
@@ -63,7 +67,7 @@ async function loadLevel(sourceData, level, width, height) {
   scene.add(s2);
 }
 
-const world = await getFile("world.json");
+const world = await createWorld();
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 

@@ -1,0 +1,13 @@
+@import "~bootstrap/scss/bootstrap";
+
+#world {
+  width: 100%;
+  background-color: azure;
+  height: 0;
+  padding-bottom: 100%;
+}
+
+#levelChooser {
+  max-height: 15em;
+  overflow: scroll;
+}

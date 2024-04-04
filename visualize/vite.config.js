@@ -9,7 +9,8 @@ module.exports = {
     },
   },
   build: {
-    outDir: "../docs",
+    outDir: "../../docs",
+    emptyOutDir: true,
     target: "esnext",
   },
 };

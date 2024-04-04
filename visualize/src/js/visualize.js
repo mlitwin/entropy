@@ -6,20 +6,56 @@ async function initVisualization(world) {
     return await data.json();
   }
 
+  let curLevel;
+
+  async function loadLevel(sourceData, level, width, height) {
+    const data = createDataArray(sourceData, width, height);
+
+    // used the buffer to create a DataTexture
+    const texture = new THREE.DataTexture(data, width, height);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.needsUpdate = true;
+
+    //const g2 = new THREE.SphereGeometry(1, 36, 16);
+    const g2 = new THREE.TorusGeometry(3, 0.3, 16, 100);
+    const m2 = new THREE.MeshBasicMaterial();
+    m2.map = texture;
+    const s2 = new THREE.Mesh(g2, m2);
+    //s2.rotateX(Math.PI * 0.4);
+    //s2.rotateY(Math.PI / 2);
+    //s2.rotateZ(Math.PI / 4);
+
+    //s2.position.set(0, level - 1, 0);
+    s2.position.set(0, 0, 0);
+    if (curLevel) {
+      scene.remove(curLevel);
+    }
+    scene.add(s2);
+    curLevel = s2;
+  }
+
+  async function loadLevelFromFile(file) {
+    const data = await getFile(file);
+    await loadLevel(data, file, world.width, world.height);
+  }
+
   document.addEventListener("level", (e) => {
     console.log(e.detail);
+    loadLevelFromFile(e.detail);
   });
+
+  const container = document.getElementById("world");
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
     120,
-    window.innerWidth / window.innerHeight,
+    container.scrollWidth / container.scrollHeight,
     0.1,
     100
   );
 
   const renderer = new THREE.WebGLRenderer();
-  const container = document.getElementById("world");
   renderer.setSize(container.scrollWidth, container.scrollHeight);
   container.appendChild(renderer.domElement);
 
@@ -44,29 +80,6 @@ async function initVisualization(world) {
     }
 
     return d;
-  }
-
-  async function loadLevel(sourceData, level, width, height) {
-    const data = createDataArray(sourceData, width, height);
-
-    // used the buffer to create a DataTexture
-    const texture = new THREE.DataTexture(data, width, height);
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.needsUpdate = true;
-
-    //const g2 = new THREE.SphereGeometry(1, 36, 16);
-    const g2 = new THREE.TorusGeometry(3, 0.3, 16, 100);
-    const m2 = new THREE.MeshBasicMaterial();
-    m2.map = texture;
-    const s2 = new THREE.Mesh(g2, m2);
-    //s2.rotateX(Math.PI * 0.4);
-    //s2.rotateY(Math.PI / 2);
-    //s2.rotateZ(Math.PI / 4);
-
-    //s2.position.set(0, level - 1, 0);
-    s2.position.set(0, 0, 0);
-    scene.add(s2);
   }
 
   camera.lookAt(new THREE.Vector3(0, 0, 0));

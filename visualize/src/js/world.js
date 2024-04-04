@@ -1,4 +1,5 @@
-import * as bootstrap from "bootstrap";
+import "../scss/styles.scss";
+//import * as bootstrap from "bootstrap";
 import * as Handlebars from "handlebars";
 
 async function getFile(file) {

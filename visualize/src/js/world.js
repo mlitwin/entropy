@@ -1,3 +1,4 @@
+import * as bootstrap from "bootstrap";
 import * as Handlebars from "handlebars";
 
 async function getFile(file) {
@@ -15,9 +16,9 @@ const header = Handlebars.compile(`
 const levelChooser = Handlebars.compile(`
 {{#each levels}}
 {{#if this.level}}
-<button class="list-group-item list-group-item-action">{{this.level}}</button>
+<button class="list-group-item list-group-item-action" data-file="{{this.file}}">{{this.level}}</button>
 {{else}}
-<button class="list-group-item list-group-item-action active aria-current="true">{{this.level}}</button>
+<button class="list-group-item list-group-item-action  data-file="{{this.file}} active aria-current="true">{{this.level}}</button>
 
 {{/if}}
 {{/each}}
@@ -28,7 +29,16 @@ async function createWorld() {
   const world = await getFile("world.json");
 
   document.getElementById("header").innerHTML = header(world);
-  document.getElementById("levelChooser").innerHTML = levelChooser(world);
+  const levelChooserEl = document.getElementById("levelChooser");
+  levelChooserEl.innerHTML = levelChooser(world);
+  levelChooserEl.addEventListener("click", (e) => {
+    const button = e.target.closest("button");
+    const event = new CustomEvent("level", {
+      bubbles: true,
+      detail: button.dataset.file,
+    });
+    button.dispatchEvent(event);
+  });
 
   return world;
 }

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-async function initVisualization(world) {
+function initVisualization(world) {
   async function getFile(file) {
     const data = await fetch(file);
     return await data.json();
@@ -8,7 +8,7 @@ async function initVisualization(world) {
 
   let curLevel;
 
-  async function loadLevel(sourceData, level, width, height) {
+  function createLevel(sourceData, level, width, height) {
     const data = createDataArray(sourceData, width, height);
 
     // used the buffer to create a DataTexture
@@ -34,16 +34,6 @@ async function initVisualization(world) {
     scene.add(s2);
     curLevel = s2;
   }
-
-  async function loadLevelFromFile(file) {
-    const data = await getFile(file);
-    await loadLevel(data, file, world.width, world.height);
-  }
-
-  document.addEventListener("level", (e) => {
-    console.log(e.detail);
-    loadLevelFromFile(e.detail);
-  });
 
   const container = document.getElementById("world");
 
@@ -93,12 +83,15 @@ async function initVisualization(world) {
     // s2.rotation.y += 0.0001;
   }
   animate();
+  async function loadLevel(index) {
+    const entry = world.levels[index];
+    const data = await getFile(entry.file);
+    createLevel(data, entry.level, world.width, world.height);
+  }
 
-  const worldNum = Math.floor(world.levels.length / 2);
-  // 900 950
-  const entry = world.levels[0];
-  const data = await getFile(entry.file);
-  await loadLevel(data, entry.level, world.width, world.height);
+  return {
+    loadLevel,
+  };
 }
 
 export { initVisualization };

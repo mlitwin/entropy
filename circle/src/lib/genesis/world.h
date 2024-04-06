@@ -17,6 +17,8 @@ struct WorldView
     int **densities;
     int **probabilities;
     int **cohorts;
+    int **states;
+    int *num_states;
 };
 
 struct World

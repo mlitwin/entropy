@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -91,6 +92,37 @@ static void outputMesh(struct W w, int **mesh, int size, const char *outputFileN
     fclose(outfile);
 }
 
+/*
+
+    Sum_n -p[i] ln(p[i])
+    Sum_n -c[i]/n ln(c[i]/n)
+    -1/n Sum_n c[i](ln(c[i]) - ln(n))
+    ln(n) - 1/n c[i]ln(c[])
+*/
+static double shannon_entropy(int n, int *states)
+{
+    double c = 0;
+    double nd = 0;
+    for (int i = 0; i < n; i++)
+    {
+        const double s = (double)states[i];
+        nd += s;
+        c += s * log(s);
+    }
+
+    return log(nd) - c / nd;
+}
+
+static void jfprintStates(json_stream *restrict stream, int n, int *states)
+{
+    kv_jfprintf(stream, "states", JSON_ARRAY_START);
+    while (n--)
+    {
+        jfprintf(stream, JSON_INT, *(states++));
+    }
+    jfprintf(stream, JSON_ARRAY_END);
+}
+
 void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, const char *dir)
 {
     const int size = 1024;
@@ -127,6 +159,8 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
         jfprintf(stream, JSON_OBJECT_START);
         kv_jfprintf(stream, "level", JSON_INT, level);
         kv_jfprintf(stream, "file", JSON_STRING, levelFile);
+        kv_jfprintf(stream, "shannon_entropy", JSON_NUMBER, shannon_entropy(w.v->num_states[level], w.v->states[level]));
+        jfprintStates(stream, w.v->num_states[level], w.v->states[level]);
         jfprintf(stream, JSON_OBJECT_END);
     }
     jfprintf(stream, JSON_ARRAY_END);

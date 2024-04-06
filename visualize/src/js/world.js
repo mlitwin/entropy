@@ -17,9 +17,9 @@ const header = Handlebars.compile(`
 const levelChooser = Handlebars.compile(`
 {{#each levels}}
 {{#if this.level}}
-<button class="list-group-item list-group-item-action" data-level="{{this.level}}">{{this.level}}</button>
+<button class="list-group-item list-group-item-action" data-level="{{this.level}}">{{this.level}} {{this.shannon_entropy}}</button>
 {{else}}
-<button class="list-group-item list-group-item-action  data-level="{{this.level}} active aria-current="true">{{this.level}}</button>
+<button class="list-group-item list-group-item-action  data-level="{{this.level}} active aria-current="true">{{this.level}} {{this.shannon_entropy}}</button>
 
 {{/if}}
 {{/each}}

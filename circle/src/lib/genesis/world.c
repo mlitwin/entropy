@@ -45,7 +45,6 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
     w->permutation = (int **)NewMatrix(sizeof(int), w->num_v, n);
 
     w->v.densities = (int **)NewMatrix(sizeof(int), w->s.period, n);
-
     w->cur = w->a;
     w->next = w->b;
 
@@ -56,6 +55,8 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
 
 void DestroyWorld(struct World *w)
 {
+    free(w->v.num_states);
+    DestroyMatrix((void **)w->v.states);
     DestroyMatrix((void **)w->v.probabilities);
     DestroyMatrix((void **)w->v.cohorts);
     DestroyMatrix((void **)w->v.densities);
@@ -166,7 +167,7 @@ static int computeCohorts(struct World *w, struct densityEntry *densities, int *
         if (!densityEqual(densities[cur].v, densities[cur - 1].v, w->s.n, sensitivity))
         {
             cohort++;
-            cohort_counts[cohort] = 1;
+            cohort_counts[cohort] = 0;
         }
         densities[cur].cohort = cohort;
         cohort_counts[cohort]++;
@@ -204,6 +205,8 @@ void BeholdWorld(struct World *w)
 
     w->v.cohorts = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
     w->v.probabilities = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
+    w->v.states = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
+    w->v.num_states = (int *)calloc(sizeof(int), w->s.sensitivity);
 
     for (int t = 0; t < w->s.period; t++)
     {
@@ -217,7 +220,11 @@ void BeholdWorld(struct World *w)
         sortThunk.sensitivity = s + 1;
         qsort_r(densities, w->s.period, sizeof(struct densityEntry), &sortThunk, densityCmp);
 
-        computeCohorts(w, densities, cohort_counts, s + 1);
+        w->v.num_states[s] = computeCohorts(w, densities, cohort_counts, s + 1) + 1;
+        for (int i = 0; i < w->v.num_states[s]; i++)
+        {
+            w->v.states[s][i] = cohort_counts[i];
+        }
         for (int i = 0; i < w->s.period; i++)
         {
             const int t = densities[i].t;

@@ -57,14 +57,19 @@ function initVisualization(world) {
     const d = new Uint8Array(4 * width * height);
 
     for (let t = 0; t < height; t++) {
+      let min = Math.min(...data.d[t]);
+      let max = Math.max(...data.d[t]);
       for (let i = 0; i < width; i++) {
         let val = data.d[t][i];
+        if (max != min) {
+          val = (val - min) / (max - min);
+        }
         //const p = Math.floor(data.p[t][i] * 255);
         const stride = (t * height + i) * 4;
-        val *= 1171;
-        d[stride] = val % 255;
-        d[stride + 1] = (2 * val) % 255;
-        d[stride + 2] = (val + 100) % 255;
+        val *= 255;
+        d[stride] = val;
+        d[stride + 1] = val;
+        d[stride + 2] = val;
         d[stride + 3] = 255;
       }
     }

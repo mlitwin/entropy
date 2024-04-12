@@ -105,8 +105,38 @@ struct densityEntry
 {
     int t;
     int cohort;
+    int shift;
     int *v;
 };
+
+static int densityCyclicCmp(int *a0, int a_start, int *b0, int b_start, int len, int sensitivity)
+{
+    int *a = a0 + a_start;
+    int *b = b0 + b_start;
+    int n = len;
+
+    while (n != 0)
+    {
+        const int diff = (*a) / sensitivity - (*b) / sensitivity;
+        if (diff != 0)
+        {
+            return diff;
+        }
+        a++;
+        if (a - a0 >= len)
+        {
+            a -= len;
+        }
+        b++;
+        if (b - b0 >= len)
+        {
+            b -= len;
+        }
+        n--;
+    }
+
+    return 0;
+}
 
 struct densitySortThunk
 {
@@ -126,19 +156,7 @@ densityCmp(void *thunk, const void *iA, const void *iB)
     int n = ds->n;
     const int sensitivity = ds->sensitivity;
 
-    while (n != 0)
-    {
-        const int diff = (*a) / sensitivity - (*b) / sensitivity;
-        if (diff != 0)
-        {
-            return diff;
-        }
-        a++;
-        b++;
-        n--;
-    }
-
-    return 0;
+    return densityCyclicCmp(a, A->shift, b, B->shift, n, sensitivity);
 }
 
 static int densityEqual(int *a, int *b, int n, int sensitivity)

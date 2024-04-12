@@ -16,12 +16,7 @@ const header = Handlebars.compile(`
 
 const levelChooser = Handlebars.compile(`
 {{#each levels}}
-{{#if this.level}}
-<button class="list-group-item list-group-item-action" data-level="{{this.level}}">{{this.level}} {{this.shannon_entropy}}</button>
-{{else}}
-<button class="list-group-item list-group-item-action  data-level="{{this.level}} active aria-current="true">{{this.level}} {{this.shannon_entropy}}</button>
-
-{{/if}}
+<button class="list-group-item list-group-item-action" data-level="{{this.level}}">{{this.level}} {{this.shannon_entropy}} {{this.time_jitter}}</button>
 {{/each}}
 
 `);
@@ -38,6 +33,12 @@ async function createWorld() {
       bubbles: true,
       detail: button.dataset.level,
     });
+    levelChooserEl.querySelectorAll("button").forEach((button) => {
+      button.classList.remove("active");
+      button.removeAttribute("aria-current");
+    });
+    button.classList.add("active");
+    button.setAttribute("aria-current", true);
     button.dispatchEvent(event);
   });
 

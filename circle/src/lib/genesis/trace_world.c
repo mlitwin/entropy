@@ -113,6 +113,25 @@ static double shannon_entropy(int n, int *states)
     return log(nd) - c / nd;
 }
 
+static double time_jitter(int n, int *probabilities)
+{
+    int jitter = 0;
+    for (int i = 0; i < n; i++)
+    {
+        const int prev = (i == 0) ? n - 1 : i - 1;
+        if (probabilities[i] > probabilities[prev])
+        {
+            jitter++;
+        }
+        else if (probabilities[i] < probabilities[prev])
+        {
+            jitter--;
+        }
+    }
+
+    return (double)jitter / (double)n;
+}
+
 static void jfprintStates(json_stream *restrict stream, int n, int *states)
 {
     kv_jfprintf(stream, "states", JSON_ARRAY_START);
@@ -160,6 +179,7 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
         kv_jfprintf(stream, "level", JSON_INT, level);
         kv_jfprintf(stream, "file", JSON_STRING, levelFile);
         kv_jfprintf(stream, "shannon_entropy", JSON_NUMBER, shannon_entropy(w.v->num_states[level], w.v->states[level]));
+        kv_jfprintf(stream, "time_jitter", JSON_NUMBER, time_jitter(w.s->n, w.v->probabilities[level]));
         jfprintStates(stream, w.v->num_states[level], w.v->states[level]);
         jfprintf(stream, JSON_OBJECT_END);
     }

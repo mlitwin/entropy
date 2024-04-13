@@ -50,15 +50,16 @@ void destroyCanonicalCycleShifter(struct canonicalCycleShifter *state)
     free(state);
 }
 
-static int computeRLE(struct canonicalCycleShifter *state, int *v)
+static int computeRLE(struct canonicalCycleShifter *state, int *v, int sensitivity)
 {
     int count = 0;
     state->digits[count].index = 0;
-    state->digits[count].value = *v++;
+    state->digits[count].value = *v / sensitivity;
+    v++;
     state->digits[count].count = 1;
     for (int i = 1; i < state->n; i++, v++)
     {
-        if (state->digits[count].value == *v)
+        if (state->digits[count].value == (*v / sensitivity))
         {
             state->digits[count].count++;
         }
@@ -66,7 +67,7 @@ static int computeRLE(struct canonicalCycleShifter *state, int *v)
         {
             count++;
             state->digits[count].index = i;
-            state->digits[count].value = *v;
+            state->digits[count].value = *v / sensitivity;
             state->digits[count].count = 1;
         }
     }
@@ -119,9 +120,9 @@ static int maxDigitRunCmp(const struct digitRun *a, const struct digitRun *b, co
     return cmp;
 }
 
-int canonicalCycleShift(struct canonicalCycleShifter *state, int *v)
+int canonicalCycleShift(struct canonicalCycleShifter *state, int *v, int sensitivity)
 {
-    const int digitCount = computeRLE(state, v);
+    const int digitCount = computeRLE(state, v, sensitivity);
     const struct rleDigit *digits = state->digits;
     struct digitRun *maxRuns = state->maxRuns;
     int maxRunCount = computeInitialDigitRun(state, digitCount);
@@ -181,7 +182,7 @@ static void testSomeCycles(int n, int **tests, int *expected)
     struct canonicalCycleShifter *shifter = createCanonicalCycleShifter(n);
     while (*tests)
     {
-        const int shift = canonicalCycleShift(shifter, *tests);
+        const int shift = canonicalCycleShift(shifter, *tests, 1);
         if (shift != *expected)
         {
             FAIL("canonicalCycleShift expected %d got %d", *expected, shift);

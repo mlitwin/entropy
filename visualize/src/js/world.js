@@ -16,7 +16,11 @@ const header = Handlebars.compile(`
 
 const levelChooser = Handlebars.compile(`
 {{#each levels}}
-<button class="list-group-item list-group-item-action" data-level="{{this.level}}">{{this.level}} {{this.shannon_entropy}} {{this.time_jitter}}</button>
+<button class="list-group-item list-group-item-action" data-level="{{this.level}}">
+  level: {{this.level}}
+  num_states: {{this.num_states}}
+  shannon_entropy: {{this.shannon_entropy}}
+  time_jitter: {{this.time_jitter}}</button>
 {{/each}}
 
 `);

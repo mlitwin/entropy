@@ -9,29 +9,13 @@
 
 #include "../lib/types/matrix.h"
 #include "../lib/stdio/json.h"
+#include "../lib/stdio/util.h"
 
 struct W
 {
     struct WorldSpec *s;
     struct WorldView *v;
 } W;
-
-static void reportStatus(const char *step, int i, int n)
-{
-    printf("\33[2K\r%s: %d/%d", step, i, n);
-    fflush(stdout);
-}
-
-static FILE *
-openFile(const char *filename, const char *mode)
-{
-    FILE *file = fopen(filename, mode);
-    if (!file)
-    {
-        fprintf(stderr, "Could not open %s for %s error code %d\n", filename, mode, errno);
-    }
-    return file;
-}
 
 static void computeMeshes(struct W w, int size, int ***meshes)
 {
@@ -178,6 +162,7 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
         jfprintf(stream, JSON_OBJECT_START);
         kv_jfprintf(stream, "level", JSON_INT, level);
         kv_jfprintf(stream, "file", JSON_STRING, levelFile);
+        kv_jfprintf(stream, "num_states", JSON_INT, w.v->num_states[level]);
         kv_jfprintf(stream, "shannon_entropy", JSON_NUMBER, shannon_entropy(w.v->num_states[level], w.v->states[level]));
         kv_jfprintf(stream, "time_jitter", JSON_NUMBER, time_jitter(w.s->n, w.v->probabilities[level]));
         jfprintStates(stream, w.v->num_states[level], w.v->states[level]);

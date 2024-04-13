@@ -1,5 +1,7 @@
 #include "world.h"
 #include "../types/matrix.h"
+#include "../algo/cycles.h"
+#include "../stdio/util.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -98,6 +100,7 @@ void RunWorld(struct World *w)
     while (w->t < w->s.n - 1)
     {
         AdvanceWorld(w);
+        reportStatus("Advancing", w->t, w->s.n - 1);
     }
 }
 
@@ -218,6 +221,7 @@ void BeholdWorld(struct World *w)
     struct densityEntry *densities = calloc(sizeof(struct densityEntry), w->s.period);
     int *cohort_counts = (int *)calloc(sizeof(int), w->s.n);
     struct densitySortThunk sortThunk;
+    struct canonicalCycleShifter *shifterState = createCanonicalCycleShifter(w->s.n);
 
     w->s.sensitivity = maxDensity(w) + 1;
 
@@ -236,6 +240,11 @@ void BeholdWorld(struct World *w)
     for (int s = 0; s < w->s.sensitivity; s++)
     {
         sortThunk.sensitivity = s + 1;
+
+        for (int i = 0; i < w->s.period; i++)
+        {
+            densities[i].shift = canonicalCycleShift(shifterState, densities[i].v, s + 1);
+        }
         qsort_r(densities, w->s.period, sizeof(struct densityEntry), &sortThunk, densityCmp);
 
         w->v.num_states[s] = computeCohorts(w, densities, cohort_counts, s + 1) + 1;
@@ -249,8 +258,9 @@ void BeholdWorld(struct World *w)
             w->v.cohorts[s][t] = densities[i].cohort;
             w->v.probabilities[s][t] = cohort_counts[densities[i].cohort];
         }
+        reportStatus("Computing states", s, w->s.sensitivity);
     }
-
+    destroyCanonicalCycleShifter(shifterState);
     free(cohort_counts);
     free(densities);
 }

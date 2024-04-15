@@ -31,11 +31,6 @@ struct World
     int t;
 
     int **cur;
-    int **permutation;
-
-    int **next;
-    int **a;
-    int **b;
 };
 
 struct World;

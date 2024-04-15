@@ -22,3 +22,4 @@ Simulate - calculate probability space (it's periodic), and find time-asymmetric
 ## Visualization
 
 https://mlitwin.github.io/entropy/
+

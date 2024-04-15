@@ -25,7 +25,6 @@ static void ordainDarkMaterials(struct World *w)
             {
                 nextI += w->s.n;
             }
-            w->permutation[j][i] = nextI;
         }
     }
 }
@@ -42,13 +41,8 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
     w->s.density = density;
     w->t = 0;
 
-    w->a = (int **)NewMatrix(sizeof(int), w->num_v, n);
-    w->b = (int **)NewMatrix(sizeof(int), w->num_v, n);
-    w->permutation = (int **)NewMatrix(sizeof(int), w->num_v, n);
-
+    w->cur = (int **)NewMatrix(sizeof(int), w->num_v, n);
     w->v.densities = (int **)NewMatrix(sizeof(int), w->s.period, n);
-    w->cur = w->a;
-    w->next = w->b;
 
     ordainDarkMaterials(w);
 
@@ -62,9 +56,6 @@ void DestroyWorld(struct World *w)
     DestroyMatrix((void **)w->v.probabilities);
     DestroyMatrix((void **)w->v.cohorts);
     DestroyMatrix((void **)w->v.densities);
-    DestroyMatrix((void **)w->permutation);
-    DestroyMatrix((void **)w->b);
-    DestroyMatrix((void **)w->a);
     free(w);
 }
 
@@ -74,25 +65,23 @@ static void AdvanceWorld(struct World *w)
 
     for (int j = 0; j < w->num_v; j++)
     {
-        int *cur_row = w->cur[j];
-        int *next_row = w->next[j];
+        const int *cur_row = w->cur[j];
+        const int velocity = j + 1;
+        const int shift = (w->t * velocity) % w->s.n;
+        const int first_segment_len = w->s.n - shift;
 
-        for (int i = 0; i < w->s.n; i++)
+        for (int i = 0; i < first_segment_len; i++)
         {
-            const int curVal = cur_row[i];
-            const int nextI = w->permutation[j][i];
+            const int nextI = i + shift;
+            w->v.densities[w->t][nextI / w->s.precision] += cur_row[i];
+        }
 
-            next_row[nextI] = curVal;
-
-            w->v.densities[w->t][nextI / w->s.precision] += curVal;
-
-            cur_row[i] = 0;
+        for (int i = first_segment_len; i < w->s.n; i++)
+        {
+            const int nextI = i - first_segment_len;
+            w->v.densities[w->t][nextI / w->s.precision] += cur_row[i];
         }
     }
-
-    int **tmp = w->cur;
-    w->cur = w->next;
-    w->next = tmp;
 }
 
 void RunWorld(struct World *w)
@@ -125,15 +114,22 @@ static int densityCyclicCmp(int *a0, int a_start, int *b0, int b_start, int len,
         {
             return diff;
         }
-        a++;
-        if (a - a0 >= len)
+        if (a - a0 == len - 1)
         {
-            a -= len;
+            a = a0;
         }
-        b++;
-        if (b - b0 >= len)
+        else
         {
-            b -= len;
+            a++;
+        }
+
+        if (b - b0 == len - 1)
+        {
+            b = b0;
+        }
+        else
+        {
+            b++;
         }
         n--;
     }
@@ -160,6 +156,21 @@ densityCmp(void *thunk, const void *iA, const void *iB)
     const int sensitivity = ds->sensitivity;
 
     return densityCyclicCmp(a, A->shift, b, B->shift, n, sensitivity);
+    while (n != 0)
+    {
+        const int diff = (*a) / sensitivity - (*b) / sensitivity;
+        if (diff != 0)
+        {
+            return diff;
+        }
+        a++;
+        b++;
+        n--;
+    }
+
+    return 0;
+
+    //  return densityCyclicCmp(a, A->shift, b, B->shift, n, sensitivity);
 }
 
 static int densityEqual(int *a, int *b, int n, int sensitivity)
@@ -241,10 +252,12 @@ void BeholdWorld(struct World *w)
     {
         sortThunk.sensitivity = s + 1;
 
-        for (int i = 0; i < w->s.period; i++)
-        {
-            densities[i].shift = canonicalCycleShift(shifterState, densities[i].v, s + 1);
-        }
+        /*
+                for (int i = 0; i < w->s.period; i++)
+                {
+                    densities[i].shift = canonicalCycleShift(shifterState, densities[i].v, s + 1);
+                }
+                */
         qsort_r(densities, w->s.period, sizeof(struct densityEntry), &sortThunk, densityCmp);
 
         w->v.num_states[s] = computeCohorts(w, densities, cohort_counts, s + 1) + 1;
@@ -295,11 +308,12 @@ void PrintWorld(const struct World *w)
 void TEST_World()
 {
     struct World *w;
-    const int n = 500;
+    const int n = 25;
 
     srand(1);
-    w = CreateNeWorld(n, 3, 10, 1);
+    w = CreateNeWorld(n, 2, 2, 1);
     RunWorld(w);
+    /* PrintWorld(w); */
     BeholdWorld(w);
     DestroyWorld(w);
 }

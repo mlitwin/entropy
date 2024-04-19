@@ -20,6 +20,7 @@ void Destroy_JSON_Stream(json_stream *stream);
 
 int jfprintf(json_stream *restrict stream, enum json_operation op, ...);
 int kv_jfprintf(json_stream *restrict stream, const char *key, enum json_operation op, ...);
+int vec_jfprinf(json_stream *restrict stream, enum json_operation op, int len, ...);
 
 #ifdef TEST
 void TEST_JSON();

@@ -198,6 +198,7 @@ int jfprintf(json_stream *restrict stream, enum json_operation op, ...)
 
     return ret;
 }
+
 int kv_jfprintf(json_stream *restrict stream, const char *key, enum json_operation op, ...)
 {
     int ret = 0;
@@ -210,6 +211,50 @@ int kv_jfprintf(json_stream *restrict stream, const char *key, enum json_operati
     va_start(args, op);
     ret += value_print(stream, op, args);
     va_end(args);
+
+    return ret;
+}
+
+static int int_vec_jfprinf(json_stream *restrict stream, const int *vec, const int len)
+{
+    int ret = 0;
+
+    ret += fprintf(stream->file, "%d", vec[0]);
+    for (int i = 1; i < len; i++)
+    {
+        ret += fprintf(stream->file, ", %d", vec[i]);
+    }
+    return ret;
+}
+
+int vec_jfprinf(json_stream *restrict stream, enum json_operation op, int len, ...)
+{
+    int ret = 0;
+    va_list args;
+
+    va_start(args, len);
+
+    ret += jfprintf(stream, JSON_ARRAY_START);
+
+    switch (op)
+    {
+    case JSON_INT:
+    {
+        int *v = va_arg(args, int *);
+        ret += int_vec_jfprinf(stream, v, len);
+    }
+    break;
+    default:
+    {
+        fprintf(stderr, "Not supported op %d in vec_jfprinf", op);
+        exit(-1);
+    }
+    break;
+    }
+
+    va_end(args);
+
+    ret += jfprintf(stream, JSON_ARRAY_END);
 
     return ret;
 }

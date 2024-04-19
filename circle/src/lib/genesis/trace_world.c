@@ -61,10 +61,14 @@ static void outputMesh(struct W w, int **mesh, int size, const char *outputFileN
     {
         jfprintf(stream, JSON_ARRAY_START);
 
+        vec_jfprinf(stream, JSON_INT, size, mesh[i]);
+
+#if 0
         for (int j = 0; j < size; j++)
         {
             jfprintf(stream, JSON_INT, mesh[i][j]);
         }
+#endif
 
         jfprintf(stream, JSON_ARRAY_END);
     }

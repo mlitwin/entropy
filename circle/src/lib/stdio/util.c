@@ -5,8 +5,12 @@
 
 int reportStatus(const char *step, int i, int n)
 {
+#ifndef TEST
     printf("\33[2K\r%s: %d/%d", step, i, n);
     return fflush(stdout);
+#else
+    return 0;
+#endif
 }
 
 FILE *

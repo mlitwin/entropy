@@ -6,7 +6,7 @@ PROFILE=
 
 CC = gcc
 # -Wpadded 
-CFLAGS = $(PROFILE) -g -Wall -O0 -std=c99 -I./types -D$(MODE) -Isrc/lib
+CFLAGS = $(PROFILE) -g -Wall -O2 -std=c99 -I./types -D$(MODE) -Isrc/lib
 LDFLAGS = -lc -lm $(PROFILE)
 
 OBJDIR=build/objs/$(TARGET)
@@ -57,5 +57,6 @@ clean:
 
 world:
 	./circle -n5000 -v10 -d10 --outdir=../visualize/src/public/ --outname=world
+#	./circle -n100 -v2 -d2 --outdir=../visualize/src/public/ --outname=world
 
 -include $(OBJDIR)/.depend

@@ -2,6 +2,7 @@
 #include "../types/matrix.h"
 #include "../algo/cycles.h"
 #include "../stdio/util.h"
+#include "../mem/mem.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +32,7 @@ static void ordainDarkMaterials(struct World *w)
 
 struct World *CreateNeWorld(int n, int v, int density, int precision)
 {
-    struct World *w = calloc(sizeof(struct World), 1);
+    struct World *w = mem_calloc(sizeof(struct World), 1);
 
     w->s.n = n;
     w->s.period = n;
@@ -229,8 +230,8 @@ static int maxDensity(struct World *w)
 
 void BeholdWorld(struct World *w)
 {
-    struct densityEntry *densities = calloc(sizeof(struct densityEntry), w->s.period);
-    int *cohort_counts = (int *)calloc(sizeof(int), w->s.n);
+    struct densityEntry *densities = mem_calloc(sizeof(struct densityEntry), w->s.period);
+    int *cohort_counts = (int *)mem_calloc(sizeof(int), w->s.n);
     struct densitySortThunk sortThunk;
     struct canonicalCycleShifter *shifterState = createCanonicalCycleShifter(w->s.n);
 
@@ -239,7 +240,7 @@ void BeholdWorld(struct World *w)
     w->v.cohorts = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
     w->v.probabilities = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
     w->v.states = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
-    w->v.num_states = (int *)calloc(sizeof(int), w->s.sensitivity);
+    w->v.num_states = (int *)mem_calloc(sizeof(int), w->s.sensitivity);
 
     for (int t = 0; t < w->s.period; t++)
     {

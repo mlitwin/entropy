@@ -1,10 +1,12 @@
 #include "matrix.h"
+#include "../mem/mem.h"
+
 #include <stdlib.h>
 
 void **NewMatrix(int size, int m, int n)
 {
-    void **ret = calloc(m, sizeof(void *));
-    *ret = calloc(size, m * n);
+    void **ret = mem_calloc(m, sizeof(void *));
+    *ret = mem_calloc(size, m * n);
 
     for (int j = 0; j < m; j++)
     {

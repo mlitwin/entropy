@@ -1,5 +1,7 @@
 #include "json.h"
 
+#include "../mem/mem.h"
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <float.h>
@@ -25,7 +27,7 @@ struct json_stack_node
 
 static void stack_node_push(struct json_stack_node **node, enum json_stack_type type)
 {
-    struct json_stack_node *new_node = calloc(sizeof(struct json_stack_node), 1);
+    struct json_stack_node *new_node = mem_calloc(sizeof(struct json_stack_node), 1);
     new_node->type = type;
     if (type != JSON_STACK_TYPE_ROOT)
     {
@@ -53,7 +55,7 @@ struct json_stream
 
 json_stream *Create_JSON_Stream(FILE *file)
 {
-    json_stream *stream = calloc(sizeof(json_stream), 1);
+    json_stream *stream = mem_calloc(sizeof(json_stream), 1);
     stream->file = file;
     stack_node_push(&stream->node, JSON_STACK_TYPE_ROOT);
 

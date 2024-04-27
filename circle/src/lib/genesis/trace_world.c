@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <math.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,6 +11,7 @@
 #include "../lib/types/matrix.h"
 #include "../lib/stdio/json.h"
 #include "../lib/stdio/util.h"
+#include "../lib/mem/mem.h"
 
 struct W
 {
@@ -17,36 +19,94 @@ struct W
     struct WorldView *v;
 } W;
 
-static void computeMeshes(struct W w, int size, int ***meshes)
+static int cmp_density(const void *a, const void *b)
 {
-    const int grain_n = (w.s->n + size - 1) / size;
-    const int n = grain_n * size;
-    const int grain_m = (w.s->period + size - 1) / size;
-    const int m = grain_m * size;
+    return *(int *)b - *(int *)a;
+}
 
-    for (int i = 0; i < n; i++)
+static void computeMeshPixel(struct W w, int i0, int j0, int grain_i, int grain_j, int size, int *buf, int ***meshes)
+{
+    int **densities = w.v->densities;
+    const int n = w.s->n;
+    const int sensitivity = w.s->sensitivity;
+    const int period = w.s->period;
+    const int buflen = grain_i * grain_j;
+
+    int *b = buf;
+
+    int leg1 = (j0 + grain_j <= n) ? grain_j : n - j0;
+    int leg2 = grain_j - leg1;
+    int cur, curCount;
+
+    // printf("%d %d\n", i0, j0);
+
+    for (int t = 0; t < grain_i; t++)
     {
-        const int i0 = i % w.s->n;
-        const int i_mesh = i / grain_n;
-        reportStatus("Computing Meshes", i, n);
-
-        for (int j = 0; j < m; j++)
+        const int *row = densities[(t + i0 * grain_i) % period];
+        memcpy(b, row + j0, leg1 * sizeof(int));
+        b += leg1;
+    }
+    if (leg2 > 0)
+    {
+        for (int t = 0; t < grain_i; t++)
         {
-            const int j0 = j % w.s->period;
+            const int *row = densities[(t + i0 * grain_i) % period];
+            memcpy(b, row, leg2 * sizeof(int));
+            b += leg2;
+        }
+    }
 
-            const int d = w.v->densities[i0][j0];
-            const int j_mesh = j / grain_m;
-            for (int s = 0; s < w.s->sensitivity; s++)
+    qsort(buf, buflen, sizeof(int), cmp_density);
+
+    cur = -1;
+    curCount = 0;
+    for (int k = 0; k < buflen; k++)
+    {
+        const int val = buf[k];
+        int emit = (k == buflen - 1);
+        if (val == cur)
+        {
+            curCount++;
+        }
+        else
+        {
+            cur = val;
+            curCount = 1;
+            emit = 1;
+        }
+
+        if (emit)
+        {
+            int s;
+            for (s = 0; s < sensitivity; s++)
             {
-                const int v = d / (s + 1);
+                const int v = val / (s + 1);
                 if (v == 0)
                 {
                     break;
                 }
-                meshes[s][i_mesh][j_mesh] += v;
+                meshes[s][i0][j0] += curCount * v;
             }
         }
     }
+}
+
+static void computeMeshes(struct W w, int size, int ***meshes)
+{
+    const int grain_i = (w.s->n + size - 1) / size;
+    const int grain_j = (w.s->period + size - 1) / size;
+
+    int *buf = mem_calloc(grain_i * grain_j, sizeof(int));
+    for (int i = 0; i < size; i++)
+    {
+        reportStatus("Computing Meshes: Row ", i, size);
+
+        for (int j = 0; j < size; j++)
+        {
+            computeMeshPixel(w, i, j, grain_i, grain_j, size, buf, meshes);
+        }
+    }
+    free(buf);
 }
 
 static void outputMesh(struct W w, int **mesh, int size, const char *outputFileName)
@@ -59,18 +119,7 @@ static void outputMesh(struct W w, int **mesh, int size, const char *outputFileN
     kv_jfprintf(stream, "d", JSON_ARRAY_START);
     for (int i = 0; i < size; i++)
     {
-        jfprintf(stream, JSON_ARRAY_START);
-
         vec_jfprinf(stream, JSON_INT, size, mesh[i]);
-
-#if 0
-        for (int j = 0; j < size; j++)
-        {
-            jfprintf(stream, JSON_INT, mesh[i][j]);
-        }
-#endif
-
-        jfprintf(stream, JSON_ARRAY_END);
     }
     jfprintf(stream, JSON_ARRAY_END);
 
@@ -132,10 +181,15 @@ static void jfprintStates(json_stream *restrict stream, int n, int *states)
 
 void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, const char *dir)
 {
-    const int size = 1024;
+    int size = 1024;
     const int levels = ws->sensitivity;
     struct W w = {ws, wv};
     char filePath[PATH_MAX];
+
+    if (size > ws->n)
+    {
+        size = ws->n;
+    }
 
     if (dir)
     {
@@ -149,7 +203,7 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
     sprintf(filePath, "%s.json", name);
     FILE *indexFile = openFile(filePath, "w");
     json_stream *stream = Create_JSON_Stream(indexFile);
-    int ***meshes = malloc(sizeof(int ***) * size);
+    int ***meshes = mem_malloc(sizeof(int ***) * size);
 
     jfprintf(stream, JSON_OBJECT_START);
     kv_jfprintf(stream, "n", JSON_INT, w.s->n);

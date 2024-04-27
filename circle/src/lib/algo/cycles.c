@@ -1,6 +1,9 @@
 #include "cycles.h"
+
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "../mem/mem.h"
 
 struct rleDigit
 {
@@ -35,10 +38,10 @@ struct canonicalCycleShifter
 
 struct canonicalCycleShifter *createCanonicalCycleShifter(int n)
 {
-    struct canonicalCycleShifter *state = calloc(sizeof(struct canonicalCycleShifter), 1);
+    struct canonicalCycleShifter *state = mem_calloc(sizeof(struct canonicalCycleShifter), 1);
     state->n = n;
-    state->digits = calloc(sizeof(struct rleDigit), n);
-    state->maxRuns = calloc(sizeof(struct digitRun), n);
+    state->digits = mem_calloc(sizeof(struct rleDigit), n);
+    state->maxRuns = mem_calloc(sizeof(struct digitRun), n);
 
     return state;
 }
@@ -201,9 +204,9 @@ void TEST_Cycles()
                     (int[]){9, 1, 2, 9, 2},
                     (int[]){9, 9, 9, 9, 0},
                     (int[]){9, 8, 9, 0, 0},
-                    (int[]){9, 8, 9, 8, 0},
+                    (int[]){9, 8, 9, 8, 9},
                     0};
-    static int expected[] = {3, 2, 3, 0};
+    static int expected[] = {3, 2, 3, 0, 0, 4};
 
     testSomeCycles(5, tests, expected);
 }

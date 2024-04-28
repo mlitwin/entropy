@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 struct canonicalCycleShifter;
 
 struct canonicalCycleShifter *createCanonicalCycleShifter(int n);

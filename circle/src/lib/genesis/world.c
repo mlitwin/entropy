@@ -94,14 +94,6 @@ void RunWorld(struct World *w)
     }
 }
 
-struct densityEntry
-{
-    int t;
-    int cohort;
-    int shift;
-    int *v;
-};
-
 static int densityCyclicCmp(int *a0, int a_start, int *b0, int b_start, int len, int sensitivity)
 {
     int *a = a0 + a_start;

@@ -12,6 +12,14 @@ struct WorldSpec
     int sensitivity;
 };
 
+struct densityEntry
+{
+    int t;
+    int cohort;
+    int shift;
+    int *v;
+};
+
 struct WorldView
 {
     int **densities;

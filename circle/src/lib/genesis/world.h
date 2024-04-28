@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "density_entry.h"
 #include "../types/matrix.h"
 #include "../types/vector.h"
 
@@ -13,15 +14,6 @@ struct WorldSpec
     int density;
     int precision;
     int sensitivity;
-};
-
-struct densityEntry
-{
-    int t;
-    int cohort;
-    int shift;
-    int64_t *states;
-    int *v;
 };
 
 struct WorldView

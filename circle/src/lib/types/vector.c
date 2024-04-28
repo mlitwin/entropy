@@ -41,6 +41,13 @@ void Vector_Push(int64_t **v, const int64_t a)
     (*vec)++;
 }
 
+int64_t Vector_Get(const int64_t *v, int index)
+{
+    const int64_t *vec = v - 2;
+    const int len = *vec;
+    return (index < len) ? *(v + index) : 0;
+}
+
 #ifdef TEST
 #include "test.h"
 void TEST_Vector()

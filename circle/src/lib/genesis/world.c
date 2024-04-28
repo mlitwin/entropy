@@ -98,7 +98,25 @@ static void AdvanceWorld(struct World *w)
 
 static void recordWorld(struct World *w)
 {
+    const int n = w->s.n;
     const int *densities = w->v.densities[w->t];
+    int maxDensity = densities[0];
+    for (int i = 1; i < n; i++)
+    {
+        if (densities[i] > maxDensity)
+        {
+            maxDensity = densities[i];
+        }
+    }
+    for (int i = 1; i <= maxDensity; i++)
+    {
+        int64_t hash = cycleHash(densities, i, 0, n);
+        if (hash == 0)
+        {
+            break;
+        }
+        Vector_Push(&w->v.density_entries[w->t].states, hash);
+    }
 }
 
 void RunWorld(struct World *w)
@@ -160,6 +178,8 @@ densityCmp(void *thunk, const void *iA, const void *iB)
     struct densitySortThunk *ds = thunk;
     const struct densityEntry *A = iA;
     const struct densityEntry *B = iB;
+    return densityEntryCmp(A, B, ds->sensitivity);
+#if 0
     int *a = A->v;
     int *b = B->v;
 
@@ -182,6 +202,7 @@ densityCmp(void *thunk, const void *iA, const void *iB)
     return 0;
 
     //  return densityCyclicCmp(a, A->shift, b, B->shift, n, sensitivity);
+#endif
 }
 
 static int densityEqual(int *a, int *b, int n, int sensitivity)
@@ -207,7 +228,8 @@ static int computeCohorts(struct World *w, struct densityEntry *densities, int *
 
     while (cur < w->s.period)
     {
-        if (!densityEqual(densities[cur].v, densities[cur - 1].v, w->s.n, sensitivity))
+
+        if (0 != densityEntryCmp(densities + cur, densities + cur - 1, sensitivity))
         {
             cohort++;
             cohort_counts[cohort] = 0;
@@ -240,7 +262,7 @@ static int maxDensity(struct World *w)
 
 void BeholdWorld(struct World *w)
 {
-    struct densityEntry *densities = mem_calloc(sizeof(struct densityEntry), w->s.period);
+    struct densityEntry *densities = w->v.density_entries;
     int *cohort_counts = (int *)mem_calloc(sizeof(int), w->s.n);
     struct densitySortThunk sortThunk;
     struct canonicalCycleShifter *shifterState = createCanonicalCycleShifter(w->s.n);
@@ -286,7 +308,6 @@ void BeholdWorld(struct World *w)
     }
     destroyCanonicalCycleShifter(shifterState);
     free(cohort_counts);
-    free(densities);
 }
 
 static void printMatrix(int **mat, int m, int n)

@@ -181,7 +181,7 @@ int canonicalCycleShift(struct canonicalCycleShifter *state, int *v, int sensiti
 // https://cp-algorithms.com/string/string-hashing.html
 const int64_t m = 1000000009; /* (10^9 + 9) a prime */
 const int64_t p = 1000000007; /* 10^9 + 7 a prime */
-int64_t cycleHash(int *v, int sensitivity, int start, int len)
+int64_t cycleHash(const int *v, int sensitivity, int start, int len)
 {
     int64_t ret = 0;
     int64_t a = 1;
@@ -189,7 +189,7 @@ int64_t cycleHash(int *v, int sensitivity, int start, int len)
     {
         int index = (i + start) % len;
         int val = v[index] / sensitivity;
-        ret += (val * a) % m;
+        ret = (ret + ((val * a) % m)) % m;
 
         a = (a * p) % m;
     }

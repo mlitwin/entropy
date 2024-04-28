@@ -33,9 +33,10 @@ static void ordainDarkMaterials(struct World *w)
 struct World *CreateNeWorld(int n, int v, int density, int precision)
 {
     struct World *w = mem_calloc(sizeof(struct World), 1);
+    const int period = n;
 
     w->s.n = n;
-    w->s.period = n;
+    w->s.period = period;
     w->s.precision = precision;
     w->num_v = 2 * v + 1;
     w->s.v = v;
@@ -43,7 +44,12 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
     w->t = 0;
 
     w->cur = (int **)NewMatrix(sizeof(int), w->num_v, n);
-    w->v.densities = (int **)NewMatrix(sizeof(int), w->s.period, n);
+    w->v.densities = (int **)NewMatrix(sizeof(int), period, n);
+    w->v.density_entries = mem_calloc(period, sizeof(struct densityEntry));
+    for (int i = 0; i < period; i++)
+    {
+        w->v.density_entries[i].states = NewVector(density);
+    }
 
     ordainDarkMaterials(w);
 
@@ -57,6 +63,11 @@ void DestroyWorld(struct World *w)
     DestroyMatrix((void **)w->v.probabilities);
     DestroyMatrix((void **)w->v.cohorts);
     DestroyMatrix((void **)w->v.densities);
+    for (int i = 0; i < w->s.period; i++)
+    {
+        DestroyVector(w->v.density_entries[i].states);
+    }
+    free(w->v.density_entries);
     free(w);
 }
 
@@ -85,11 +96,18 @@ static void AdvanceWorld(struct World *w)
     }
 }
 
+static void recordWorld(struct World *w)
+{
+    const int *densities = w->v.densities[w->t];
+}
+
 void RunWorld(struct World *w)
 {
+    recordWorld(w);
     while (w->t < w->s.n - 1)
     {
         AdvanceWorld(w);
+        recordWorld(w);
         reportStatus("Advancing", w->t, w->s.n - 1);
     }
 }

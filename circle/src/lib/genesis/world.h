@@ -1,6 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "../types/matrix.h"
+#include "../types/vector.h"
 
 struct WorldSpec
 {
@@ -17,6 +20,7 @@ struct densityEntry
     int t;
     int cohort;
     int shift;
+    int64_t *states;
     int *v;
 };
 
@@ -27,6 +31,7 @@ struct WorldView
     int **cohorts;
     int **states;
     int *num_states;
+    struct densityEntry *density_entries;
 };
 
 struct World

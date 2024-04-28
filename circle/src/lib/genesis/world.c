@@ -5,7 +5,6 @@
 #include "../mem/mem.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <strings.h>
 
 static void ordainDarkMaterials(struct World *w)
@@ -130,45 +129,6 @@ void RunWorld(struct World *w)
     }
 }
 
-struct densitySortThunk
-{
-    int n;
-    int sensitivity;
-};
-
-static int
-densityCmp(void *thunk, const void *iA, const void *iB)
-{
-    struct densitySortThunk *ds = thunk;
-    const struct densityEntry *A = iA;
-    const struct densityEntry *B = iB;
-    return densityEntryCmp(A, B, ds->sensitivity);
-}
-
-static int computeCohorts(struct World *w, struct densityEntry *densities, int *cohort_counts, int sensitivity)
-{
-    int cohort = 0;
-    int cur = 1;
-
-    cohort_counts[0] = 1;
-    densities[0].cohort = cohort;
-
-    while (cur < w->s.period)
-    {
-
-        if (0 != densityEntryCmp(densities + cur, densities + cur - 1, sensitivity))
-        {
-            cohort++;
-            cohort_counts[cohort] = 0;
-        }
-        densities[cur].cohort = cohort;
-        cohort_counts[cohort]++;
-        cur++;
-    }
-
-    return cohort;
-}
-
 static int maxDensity(struct World *w)
 {
     int d = 0;
@@ -191,7 +151,6 @@ void BeholdWorld(struct World *w)
 {
     struct densityEntry *densities = w->v.density_entries;
     int *cohort_counts = (int *)mem_calloc(sizeof(int), w->s.n);
-    struct densitySortThunk sortThunk;
     struct canonicalCycleShifter *shifterState = createCanonicalCycleShifter(w->s.n);
 
     w->s.sensitivity = maxDensity(w) + 1;
@@ -207,10 +166,8 @@ void BeholdWorld(struct World *w)
         densities[t].v = w->v.densities[t];
     }
 
-    sortThunk.n = w->s.n;
     for (int s = 0; s < w->s.sensitivity; s++)
     {
-        sortThunk.sensitivity = s + 1;
 
         /*
                 for (int i = 0; i < w->s.period; i++)
@@ -218,9 +175,8 @@ void BeholdWorld(struct World *w)
                     densities[i].shift = canonicalCycleShift(shifterState, densities[i].v, s + 1);
                 }
                 */
-        qsort_r(densities, w->s.period, sizeof(struct densityEntry), &sortThunk, densityCmp);
 
-        w->v.num_states[s] = computeCohorts(w, densities, cohort_counts, s + 1) + 1;
+        w->v.num_states[s] = ComputeCohorts(cohort_counts, densities, w->s.n, w->s.period, s + 1);
         for (int i = 0; i < w->v.num_states[s]; i++)
         {
             w->v.states[s][i] = cohort_counts[i];

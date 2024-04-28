@@ -130,42 +130,6 @@ void RunWorld(struct World *w)
     }
 }
 
-static int densityCyclicCmp(int *a0, int a_start, int *b0, int b_start, int len, int sensitivity)
-{
-    int *a = a0 + a_start;
-    int *b = b0 + b_start;
-    int n = len;
-
-    while (n != 0)
-    {
-        const int diff = (*a) / sensitivity - (*b) / sensitivity;
-        if (diff != 0)
-        {
-            return diff;
-        }
-        if (a - a0 == len - 1)
-        {
-            a = a0;
-        }
-        else
-        {
-            a++;
-        }
-
-        if (b - b0 == len - 1)
-        {
-            b = b0;
-        }
-        else
-        {
-            b++;
-        }
-        n--;
-    }
-
-    return 0;
-}
-
 struct densitySortThunk
 {
     int n;
@@ -179,43 +143,6 @@ densityCmp(void *thunk, const void *iA, const void *iB)
     const struct densityEntry *A = iA;
     const struct densityEntry *B = iB;
     return densityEntryCmp(A, B, ds->sensitivity);
-#if 0
-    int *a = A->v;
-    int *b = B->v;
-
-    int n = ds->n;
-    const int sensitivity = ds->sensitivity;
-
-    return densityCyclicCmp(a, A->shift, b, B->shift, n, sensitivity);
-    while (n != 0)
-    {
-        const int diff = (*a) / sensitivity - (*b) / sensitivity;
-        if (diff != 0)
-        {
-            return diff;
-        }
-        a++;
-        b++;
-        n--;
-    }
-
-    return 0;
-
-    //  return densityCyclicCmp(a, A->shift, b, B->shift, n, sensitivity);
-#endif
-}
-
-static int densityEqual(int *a, int *b, int n, int sensitivity)
-{
-    while (n > 0)
-    {
-        if (*(a + n - 1) / sensitivity != *(b + n - 1) / sensitivity)
-        {
-            return 0;
-        }
-        n--;
-    }
-    return 1;
 }
 
 static int computeCohorts(struct World *w, struct densityEntry *densities, int *cohort_counts, int sensitivity)

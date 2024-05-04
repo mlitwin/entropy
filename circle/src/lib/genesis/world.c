@@ -40,6 +40,7 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
     w->num_v = 2 * v + 1;
     w->s.v = v;
     w->s.density = density;
+    w->s.mesh_size = 1024;
     w->t = 0;
 
     w->cur = (int **)NewMatrix(sizeof(int), w->num_v, n);
@@ -49,6 +50,8 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
     {
         w->v.density_entries[i].states = NewVector(density);
     }
+
+    w->v.meshes = mem_malloc(sizeof(int ***) * w->s.mesh_size);
 
     ordainDarkMaterials(w);
 

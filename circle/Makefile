@@ -6,7 +6,7 @@ PROFILE=
 
 CC = gcc
 # -Wpadded 
-CFLAGS = $(PROFILE) -g -Wall -O2 -std=c99 -I./types -D$(MODE) -Isrc/lib
+CFLAGS = $(PROFILE) -g -Wall -Ofast -std=c99 -I./types -D$(MODE) -Isrc/lib
 LDFLAGS = -lc -lm $(PROFILE)
 
 OBJDIR=build/objs/$(TARGET)

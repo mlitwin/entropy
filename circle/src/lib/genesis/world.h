@@ -14,12 +14,14 @@ struct WorldSpec
     int density;
     int precision;
     int sensitivity;
+    int mesh_size;
 };
 
 struct WorldView
 {
     int **densities;
     int **probabilities;
+    int ***meshes;
     int **cohorts;
     int **states;
     int *num_states;

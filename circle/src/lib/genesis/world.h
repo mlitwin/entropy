@@ -21,7 +21,7 @@ struct WorldView
 {
     int **densities;
     int **probabilities;
-    int ***meshes;
+    int64_t ***meshes;
     int **cohorts;
     int **states;
     int *num_states;

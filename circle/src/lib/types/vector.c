@@ -17,6 +17,24 @@ void DestroyVector(int64_t *v)
     free(vec);
 }
 
+static int64_t *growVector(int64_t **v, int index)
+{
+    int64_t *vec = *v - 2;
+    int64_t capacity = *(vec + 1);
+    if (capacity <= index)
+    {
+        while (capacity <= index)
+        {
+            capacity *= 2;
+        }
+        vec = mem_realloc(vec, (capacity + 2) * sizeof(int64_t));
+        *(vec + 1) = capacity;
+        *v = vec + 2;
+    }
+
+    return vec;
+}
+
 int Vector_GetLen(int64_t *v)
 {
     int64_t *vec = v - 2;
@@ -26,17 +44,9 @@ int Vector_GetLen(int64_t *v)
 
 void Vector_Push(int64_t **v, const int64_t a)
 {
-    int64_t *vec = *v - 2;
-    const int len = *vec;
-    int64_t capacity = *(vec + 1);
+    const int len = *((*v) - 2);
+    int64_t *vec = growVector(v, len);
 
-    if (len == capacity)
-    {
-        capacity *= 2;
-        vec = mem_realloc(vec, (capacity + 2) * sizeof(int64_t));
-        *(vec + 1) = capacity;
-        *v = vec + 2;
-    }
     (*v)[len] = a;
     (*vec)++;
 }
@@ -46,6 +56,14 @@ int64_t Vector_Get(const int64_t *v, int index)
     const int64_t *vec = v - 2;
     const int len = *vec;
     return (index < len) ? *(v + index) : 0;
+}
+
+int64_t Vector_Increment(int64_t **v, int index, const int64_t a)
+{
+    growVector(v, index);
+    int64_t cur = (*v)[index];
+    (*v)[index] += a;
+    return cur;
 }
 
 #ifdef TEST
@@ -64,6 +82,12 @@ void TEST_Vector()
     if (v[2] != 4)
     {
         FAIL("Can't grow vector got %lld", v[2]);
+    }
+
+    Vector_Increment(&v, 77, 10);
+    if (v[77] != 10)
+    {
+        FAIL("Can't increment vector got %lld", v[77]);
     }
 
     DestroyVector(v);

@@ -51,7 +51,14 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
         w->v.density_entries[i].states = NewVector(density);
     }
 
-    w->v.meshes = mem_malloc(sizeof(int ***) * w->s.mesh_size);
+    w->v.meshes = (int64_t ***)NewMatrix(sizeof(int64_t *), w->s.mesh_size, w->s.mesh_size);
+    for (int i = 0; i < w->s.mesh_size; i++)
+    {
+        for (int j = 0; j < w->s.mesh_size; j++)
+        {
+            w->v.meshes[i][j] = NewVector(256);
+        }
+    }
 
     ordainDarkMaterials(w);
 
@@ -70,6 +77,15 @@ void DestroyWorld(struct World *w)
         DestroyVector(w->v.density_entries[i].states);
     }
     free(w->v.density_entries);
+    for (int i = 0; i < w->s.mesh_size; i++)
+    {
+        for (int j = 0; j < w->s.mesh_size; j++)
+        {
+            DestroyVector(w->v.meshes[i][j]);
+        }
+    }
+    DestroyMatrix((void **)w->v.meshes);
+
     free(w);
 }
 

@@ -109,7 +109,7 @@ static void computeMeshes(struct W w, int size, int ***meshes)
     free(buf);
 }
 
-static void outputMesh(struct W w, int **mesh, int size, const char *outputFileName)
+static void outputMesh(int64_t ***meshes, int *buf, int level, int size, const char *outputFileName)
 {
     FILE *outfile = openFile(outputFileName, "w");
 
@@ -119,7 +119,17 @@ static void outputMesh(struct W w, int **mesh, int size, const char *outputFileN
     kv_jfprintf(stream, "d", JSON_ARRAY_START);
     for (int i = 0; i < size; i++)
     {
-        vec_jfprinf(stream, JSON_INT, size, mesh[i]);
+        // jfprintf(stream, JSON_ARRAY_START);
+        for (int j = 0; j < size; j++)
+        {
+            const int val = Vector_Get(meshes[i][j], level);
+            buf[j] = val;
+            // jfprintf(stream, JSON_INT, val);
+        }
+
+        vec_jfprinf(stream, JSON_INT, size, buf);
+
+        // jfprintf(stream, JSON_ARRAY_END);
     }
     jfprintf(stream, JSON_ARRAY_END);
 
@@ -185,6 +195,7 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
     const int levels = ws->sensitivity;
     struct W w = {ws, wv};
     char filePath[PATH_MAX];
+    int *buf = mem_malloc(sizeof(int) * size);
 
     if (size > ws->n)
     {
@@ -203,7 +214,7 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
     sprintf(filePath, "%s.json", name);
     FILE *indexFile = openFile(filePath, "w");
     json_stream *stream = Create_JSON_Stream(indexFile);
-    int ***meshes = mem_malloc(sizeof(int ***) * size);
+    // int ***meshes = mem_malloc(sizeof(int ***) * size);
 
     jfprintf(stream, JSON_OBJECT_START);
     kv_jfprintf(stream, "n", JSON_INT, w.s->n);
@@ -215,7 +226,7 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
     {
         char levelFile[PATH_MAX];
         sprintf(levelFile, "%s/level_%d.json", name, level);
-        meshes[level] = (int **)NewMatrix(sizeof(int), size, size);
+        // meshes[level] = (int **)NewMatrix(sizeof(int), size, size);
 
         jfprintf(stream, JSON_OBJECT_START);
         kv_jfprintf(stream, "level", JSON_INT, level);
@@ -231,7 +242,7 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
     fclose(indexFile);
     Destroy_JSON_Stream(stream);
 
-    computeMeshes(w, size, meshes);
+    // computeMeshes(w, size, meshes);
 
     for (int level = 0; level < levels; level++)
     {
@@ -240,10 +251,12 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
 
         reportStatus("Writing", level, levels);
 
-        outputMesh(w, meshes[level], size, levelFile);
-        DestroyMatrix((void **)meshes[level]);
+        outputMesh(wv->meshes, buf, level, size, levelFile);
+        // DestroyMatrix((void **)meshes[level]);
     }
-    free(meshes);
+    // DestroyMatrix((void **)mesh);
+    free(buf);
+    // free(meshes);
 }
 
 #ifdef TEST

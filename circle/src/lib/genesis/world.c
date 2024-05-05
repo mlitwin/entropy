@@ -114,6 +114,35 @@ static void AdvanceWorld(struct World *w)
     }
 }
 
+static void recordMesh(struct World *w)
+{
+    const int *densities = w->v.densities[w->t];
+    const int size = w->s.mesh_size;
+    const int grain_i = (w->s.n + size - 1) / size;
+    const int grain_j = (w->s.period + size - 1) / size;
+    const int i0 = w->t / grain_i;
+    for (int j0 = 0; j0 < size; j0++)
+    {
+        for (int k = 0; k < grain_j; k++)
+        {
+            int j = (j0 * size + k) % w->s.n;
+            const int d = densities[j];
+            int s = 0;
+            while (1)
+            {
+                const int v = d / (s + 1);
+                if (v == 0)
+                {
+                    break;
+                }
+                Vector_Increment(&w->v.meshes[i0][j0], s, v);
+
+                s++;
+            }
+        }
+    }
+}
+
 static void recordWorld(struct World *w)
 {
     const int n = w->s.n;
@@ -135,6 +164,8 @@ static void recordWorld(struct World *w)
         }
         Vector_Push(&w->v.density_entries[w->t].states, hash);
     }
+
+    recordMesh(w);
 }
 
 void RunWorld(struct World *w)

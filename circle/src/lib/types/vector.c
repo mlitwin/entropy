@@ -2,6 +2,7 @@
 #include "../mem/mem.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 int64_t *NewVector(int64_t capacity)
 {
@@ -20,16 +21,18 @@ void DestroyVector(int64_t *v)
 static int64_t *growVector(int64_t **v, int index)
 {
     int64_t *vec = *v - 2;
-    int64_t capacity = *(vec + 1);
-    if (capacity <= index)
+    const int64_t capacity = *(vec + 1);
+    int64_t new_capacity = capacity;
+    if (new_capacity <= index)
     {
-        while (capacity <= index)
+        while (new_capacity <= index)
         {
-            capacity *= 2;
+            new_capacity *= 2;
         }
-        vec = mem_realloc(vec, (capacity + 2) * sizeof(int64_t));
-        *(vec + 1) = capacity;
+        vec = mem_realloc(vec, (new_capacity + 2) * sizeof(int64_t));
+        *(vec + 1) = new_capacity;
         *v = vec + 2;
+        bzero((*v) + capacity, new_capacity - capacity);
     }
 
     return vec;
@@ -60,9 +63,13 @@ int64_t Vector_Get(const int64_t *v, int index)
 
 int64_t Vector_Increment(int64_t **v, int index, const int64_t a)
 {
-    growVector(v, index);
+    int64_t *vec = growVector(v, index);
     int64_t cur = (*v)[index];
     (*v)[index] += a;
+    if (*vec <= index)
+    {
+        *vec = index + 1;
+    }
     return cur;
 }
 
@@ -88,6 +95,11 @@ void TEST_Vector()
     if (v[77] != 10)
     {
         FAIL("Can't increment vector got %lld", v[77]);
+    }
+
+    if (Vector_Get(v, 77) != 10)
+    {
+        FAIL("Can't vector get got %lld", v[77]);
     }
 
     DestroyVector(v);

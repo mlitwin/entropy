@@ -19,7 +19,7 @@ struct WorldSpec
 
 struct WorldView
 {
-    int **densities;
+    int *densities;
     int **probabilities;
     int64_t ***meshes;
     int **cohorts;

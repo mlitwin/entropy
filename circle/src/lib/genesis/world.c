@@ -19,7 +19,7 @@ static void ordainDarkMaterials(struct World *w)
             const int val = rand() % w->s.density;
 
             w->cur[j][i] = val;
-            w->v.densities[0][i] += val;
+            w->v.densities[i] += val;
 
             if (nextI < 0)
             {
@@ -44,7 +44,7 @@ struct World *CreateNeWorld(int n, int v, int density, int precision)
     w->t = 0;
 
     w->cur = (int **)NewMatrix(sizeof(int), w->num_v, n);
-    w->v.densities = (int **)NewMatrix(sizeof(int), period, n);
+    w->v.densities = mem_calloc(n, sizeof(int));
     w->v.density_entries = mem_calloc(period, sizeof(struct densityEntry));
     for (int i = 0; i < period; i++)
     {
@@ -71,7 +71,7 @@ void DestroyWorld(struct World *w)
     DestroyMatrix((void **)w->v.states);
     DestroyMatrix((void **)w->v.probabilities);
     DestroyMatrix((void **)w->v.cohorts);
-    DestroyMatrix((void **)w->v.densities);
+    free(w->v.densities);
     for (int i = 0; i < w->s.period; i++)
     {
         DestroyVector(w->v.density_entries[i].states);
@@ -92,6 +92,7 @@ void DestroyWorld(struct World *w)
 static void AdvanceWorld(struct World *w)
 {
     w->t++;
+    bzero(w->v.densities, sizeof(int) * w->s.n);
 
     for (int j = 0; j < w->num_v; j++)
     {
@@ -103,20 +104,20 @@ static void AdvanceWorld(struct World *w)
         for (int i = 0; i < first_segment_len; i++)
         {
             const int nextI = i + shift;
-            w->v.densities[w->t][nextI / w->s.precision] += cur_row[i];
+            w->v.densities[nextI / w->s.precision] += cur_row[i];
         }
 
         for (int i = first_segment_len; i < w->s.n; i++)
         {
             const int nextI = i - first_segment_len;
-            w->v.densities[w->t][nextI / w->s.precision] += cur_row[i];
+            w->v.densities[nextI / w->s.precision] += cur_row[i];
         }
     }
 }
 
 static void recordMesh(struct World *w)
 {
-    const int *densities = w->v.densities[w->t];
+    const int *densities = w->v.densities;
     const int size = w->s.mesh_size;
     const int grain_i = (w->s.n + size - 1) / size;
     const int grain_j = (w->s.period + size - 1) / size;
@@ -146,7 +147,7 @@ static void recordMesh(struct World *w)
 static void recordWorld(struct World *w)
 {
     const int n = w->s.n;
-    const int *densities = w->v.densities[w->t];
+    const int *densities = w->v.densities;
     int maxDensity = densities[0];
     for (int i = 1; i < n; i++)
     {
@@ -182,18 +183,17 @@ void RunWorld(struct World *w)
 static int maxDensity(struct World *w)
 {
     int d = 0;
-    for (int t = 0; t < w->s.period; t++)
+
+    const int *v = w->v.densities;
+    for (int i = 0; i < w->s.n; i++)
     {
-        const int *v = w->v.densities[t];
-        for (int i = 0; i < w->s.n; i++)
+        const int val = v[i];
+        if (d < val)
         {
-            const int val = v[i];
-            if (d < val)
-            {
-                d = val;
-            }
+            d = val;
         }
     }
+
     return d;
 }
 
@@ -213,7 +213,6 @@ void BeholdWorld(struct World *w)
     for (int t = 0; t < w->s.period; t++)
     {
         densities[t].t = t;
-        densities[t].v = w->v.densities[t];
     }
 
     for (int s = 0; s < w->s.sensitivity; s++)
@@ -261,7 +260,6 @@ void PrintWorld(const struct World *w)
     printf("# n v density precision sensitivity\n");
     printf("%d %d %d %d %d\n", w->s.n, w->s.v, w->s.density, w->s.precision, w->s.sensitivity);
     printf("# densities %dx%d\n", w->s.period, w->s.n);
-    printMatrix(w->v.densities, w->s.period, w->s.n);
     printf("# cohorts %dx%d\n", w->s.sensitivity, w->s.n);
     printMatrix(w->v.cohorts, w->s.sensitivity, w->s.n);
     printf("# probabilities %dx%d\n", w->s.sensitivity, w->s.n);

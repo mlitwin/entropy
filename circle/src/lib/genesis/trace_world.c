@@ -19,96 +19,6 @@ struct W
     struct WorldView *v;
 } W;
 
-static int cmp_density(const void *a, const void *b)
-{
-    return *(int *)b - *(int *)a;
-}
-
-static void computeMeshPixel(struct W w, int i0, int j0, int grain_i, int grain_j, int size, int *buf, int ***meshes)
-{
-    int **densities = w.v->densities;
-    const int n = w.s->n;
-    const int sensitivity = w.s->sensitivity;
-    const int period = w.s->period;
-    const int buflen = grain_i * grain_j;
-
-    int *b = buf;
-
-    int leg1 = (j0 + grain_j <= n) ? grain_j : n - j0;
-    int leg2 = grain_j - leg1;
-    int cur, curCount;
-
-    // printf("%d %d\n", i0, j0);
-
-    for (int t = 0; t < grain_i; t++)
-    {
-        const int *row = densities[(t + i0 * grain_i) % period];
-        memcpy(b, row + j0, leg1 * sizeof(int));
-        b += leg1;
-    }
-    if (leg2 > 0)
-    {
-        for (int t = 0; t < grain_i; t++)
-        {
-            const int *row = densities[(t + i0 * grain_i) % period];
-            memcpy(b, row, leg2 * sizeof(int));
-            b += leg2;
-        }
-    }
-
-    qsort(buf, buflen, sizeof(int), cmp_density);
-
-    cur = -1;
-    curCount = 0;
-    for (int k = 0; k < buflen; k++)
-    {
-        const int val = buf[k];
-        int emit = (k == buflen - 1);
-        if (val == cur)
-        {
-            curCount++;
-        }
-        else
-        {
-            cur = val;
-            curCount = 1;
-            emit = 1;
-        }
-
-        if (emit)
-        {
-            int s;
-            for (s = 0; s < sensitivity; s++)
-            {
-                const int v = val / (s + 1);
-                if (v == 0)
-                {
-                    break;
-                }
-                meshes[s][i0][j0] += curCount * v;
-            }
-        }
-    }
-}
-
-static void computeMeshes(struct W w, int size, int ***meshes)
-{
-    const int grain_i = (w.s->n + size - 1) / size;
-    const int grain_j = (w.s->period + size - 1) / size;
-
-    int *buf = mem_calloc(grain_i * grain_j, sizeof(int));
-    for (int i = 0; i < size; i++)
-    {
-        reportStatus("Computing Meshes: Row ", i, size);
-
-        for (int j = 0; j < size; j++)
-        {
-            computeMeshPixel(w, i, j, grain_i, grain_j, size, buf, meshes);
-        }
-    }
-    free(buf);
-}
-
 static void outputMesh(int64_t ***meshes, int *buf, int level, int size, const char *outputFileName)
 {
     FILE *outfile = openFile(outputFileName, "w");
@@ -119,17 +29,13 @@ static void outputMesh(int64_t ***meshes, int *buf, int level, int size, const c
     kv_jfprintf(stream, "d", JSON_ARRAY_START);
     for (int i = 0; i < size; i++)
     {
-        // jfprintf(stream, JSON_ARRAY_START);
         for (int j = 0; j < size; j++)
         {
             const int val = Vector_Get(meshes[i][j], level);
             buf[j] = val;
-            // jfprintf(stream, JSON_INT, val);
         }
 
         vec_jfprinf(stream, JSON_INT, size, buf);
-
-        // jfprintf(stream, JSON_ARRAY_END);
     }
     jfprintf(stream, JSON_ARRAY_END);
 
@@ -214,7 +120,6 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
     sprintf(filePath, "%s.json", name);
     FILE *indexFile = openFile(filePath, "w");
     json_stream *stream = Create_JSON_Stream(indexFile);
-    // int ***meshes = mem_malloc(sizeof(int ***) * size);
 
     jfprintf(stream, JSON_OBJECT_START);
     kv_jfprintf(stream, "n", JSON_INT, w.s->n);
@@ -226,7 +131,6 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
     {
         char levelFile[PATH_MAX];
         sprintf(levelFile, "%s/level_%d.json", name, level);
-        // meshes[level] = (int **)NewMatrix(sizeof(int), size, size);
 
         jfprintf(stream, JSON_OBJECT_START);
         kv_jfprintf(stream, "level", JSON_INT, level);
@@ -242,8 +146,6 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
     fclose(indexFile);
     Destroy_JSON_Stream(stream);
 
-    // computeMeshes(w, size, meshes);
-
     for (int level = 0; level < levels; level++)
     {
         char levelFile[PATH_MAX];
@@ -252,11 +154,8 @@ void Trace_World(struct WorldSpec *ws, struct WorldView *wv, const char *name, c
         reportStatus("Writing", level, levels);
 
         outputMesh(wv->meshes, buf, level, size, levelFile);
-        // DestroyMatrix((void **)meshes[level]);
     }
-    // DestroyMatrix((void **)mesh);
     free(buf);
-    // free(meshes);
 }
 
 #ifdef TEST

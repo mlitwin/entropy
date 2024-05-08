@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
     sranddev();
 
-    w = CreateNeWorld(n, v, d, p);
+    w = CreateNeWorld(n, v, d, p, outname != 0);
 
     RunWorld(w);
     BeholdWorld(w);

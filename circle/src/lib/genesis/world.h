@@ -20,6 +20,7 @@ struct WorldSpec
 struct WorldView
 {
     int *densities;
+    int max_density;
     int **probabilities;
     int64_t ***meshes;
     int **cohorts;
@@ -42,7 +43,7 @@ struct World
 
 struct World;
 
-struct World *CreateNeWorld(int n, int v, int density, int precision);
+struct World *CreateNeWorld(int n, int v, int density, int precision, int trace);
 
 void DestroyWorld(struct World *w);
 

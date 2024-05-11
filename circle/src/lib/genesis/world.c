@@ -124,18 +124,13 @@ static void AdvanceWorld(struct World *w)
     }
 }
 
-static void recordMesh(struct World *w)
+static void recordMeshRow(int64_t **mesh, const int *densities, int n, int i0, int size, int grain_j)
 {
-    const int *densities = w->v.densities;
-    const int size = w->s.mesh_size;
-    const int grain_i = (w->s.n + size - 1) / size;
-    const int grain_j = (w->s.period + size - 1) / size;
-    const int i0 = w->t / grain_i; // TODO i0 and iLast can overlap a bit
     for (int j0 = 0; j0 < size; j0++)
     {
         for (int k = 0; k < grain_j; k++)
         {
-            int j = (j0 * size + k) % w->s.n;
+            int j = (j0 * size + k) % n;
             const int d = densities[j];
             int s = 0;
             while (1)
@@ -145,10 +140,29 @@ static void recordMesh(struct World *w)
                 {
                     break;
                 }
-                Vector_Increment(&w->v.meshes[i0][j0], s, v);
+                Vector_Increment(&mesh[j0], s, v);
 
                 s++;
             }
+        }
+    }
+}
+
+static void recordMesh(struct World *w)
+{
+    const int *densities = w->v.densities;
+    const int size = w->s.mesh_size;
+    const int grain_i = (w->s.n + size - 1) / size;
+    const int grain_j = (w->s.period + size - 1) / size;
+    const int i0 = w->t / grain_i; // TODO i0 and iLast can overlap a bit
+    recordMeshRow(w->v.meshes[i0], densities, w->s.n, i0, size, grain_j);
+    if (i0 == 0)
+    {
+        const int iLast = w->s.n / grain_i;
+        const int remainder = (iLast + size) - w->s.n;
+        if (w->t < remainder)
+        {
+            recordMeshRow(w->v.meshes[i0], densities, w->s.n, iLast, size, grain_j);
         }
     }
 }

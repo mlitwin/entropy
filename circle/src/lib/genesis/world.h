@@ -43,7 +43,9 @@ struct World
 
 struct World;
 
-struct World *CreateNeWorld(int n, int v, int density, int precision, int trace);
+void InitWorldSpec(struct WorldSpec *ws, int n, int v, int density, int precision);
+
+struct World *CreateNeWorld(const struct WorldSpec *ws, int trace);
 
 void DestroyWorld(struct World *w);
 

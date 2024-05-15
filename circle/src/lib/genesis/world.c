@@ -29,20 +29,31 @@ static void ordainDarkMaterials(struct World *w)
     }
 }
 
-struct World *CreateNeWorld(int n, int v, int density, int precision, int trace)
+void InitWorldSpec(struct WorldSpec *ws, int n, int v, int density, int precision)
 {
-    struct World *w = mem_calloc(sizeof(struct World), 1);
     const int period = n;
 
-    w->s.n = n;
-    w->s.period = period;
-    w->s.precision = precision;
-    w->num_v = 2 * v + 1;
-    w->s.v = v;
-    w->s.density = density;
-    w->s.mesh_size = 1024;
-    w->t = 0;
+    memset(ws, 0, sizeof(struct WorldSpec));
 
+    ws->n = n;
+    ws->period = period;
+    ws->precision = precision;
+    ws->v = v;
+    ws->density = density;
+    ws->mesh_size = 1024;
+}
+
+struct World *CreateNeWorld(const struct WorldSpec *ws, int trace)
+{
+    struct World *w = mem_calloc(sizeof(struct World), 1);
+    const int n = ws->n;
+    const int period = n;
+    const int density = ws->density;
+
+    w->s = *ws;
+
+    w->num_v = 2 * w->s.v + 1;
+    w->t = 0;
     w->cur = (int **)NewMatrix(sizeof(int), w->num_v, n);
     w->v.densities = mem_calloc(n, sizeof(int));
     w->v.max_density = 0;
@@ -270,10 +281,12 @@ void PrintWorld(const struct World *w)
 void TEST_World()
 {
     struct World *w;
+    struct WorldSpec ws;
     const int n = 25;
 
     srand(1);
-    w = CreateNeWorld(n, 2, 2, 1, 1);
+    InitWorldSpec(&ws, n, 2, 2, 1);
+    w = CreateNeWorld(&ws, 1);
     RunWorld(w);
     /* PrintWorld(w); */
     BeholdWorld(w);

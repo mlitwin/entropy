@@ -15,6 +15,7 @@ static void usage()
 int main(int argc, char *argv[])
 {
     struct World *w;
+    struct WorldSpec ws;
     int n = -1, v = -1, d = -1, p = 1, ch;
     char *outdir = NULL;
     char *outname = NULL;
@@ -68,8 +69,9 @@ int main(int argc, char *argv[])
     }
 
     sranddev();
+    InitWorldSpec(&ws, n, v, d, p);
 
-    w = CreateNeWorld(n, v, d, p, outname != 0);
+    w = CreateNeWorld(&ws, outname != 0);
 
     RunWorld(w);
     BeholdWorld(w);

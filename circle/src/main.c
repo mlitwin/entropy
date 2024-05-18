@@ -20,11 +20,12 @@ int main(int argc, char *argv[])
     char *outdir = NULL;
     char *outname = NULL;
 
-    static struct option longopts[] = {
+    struct option longopts[] = {
         {"space", required_argument, NULL, 'n'},
         {"max_velocity", required_argument, NULL, 'v'},
         {"density_range", required_argument, NULL, 'd'},
         {"precision", required_argument, NULL, 'p'},
+        {"cyclic_equivalence", no_argument, &ws.cyclic_equivalence, 3},
         {"outdir", required_argument, NULL, 1},
         {"outname", required_argument, NULL, 2},
         {NULL, 0, NULL, 0}};
@@ -33,6 +34,8 @@ int main(int argc, char *argv[])
     {
         switch (ch)
         {
+        case 0:
+            break;
         case 'n':
             n = atoi(optarg);
             break;

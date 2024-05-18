@@ -14,6 +14,7 @@ struct WorldSpec
     int density;
     int precision;
     int sensitivity;
+    int cyclic_equivalence;
     int mesh_size;
 };
 

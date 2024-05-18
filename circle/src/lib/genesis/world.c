@@ -33,8 +33,6 @@ void InitWorldSpec(struct WorldSpec *ws, int n, int v, int density, int precisio
 {
     const int period = n;
 
-    memset(ws, 0, sizeof(struct WorldSpec));
-
     ws->n = n;
     ws->period = period;
     ws->precision = precision;
@@ -183,6 +181,8 @@ static void recordWorld(struct World *w)
     const int n = w->s.n;
     const int *densities = w->v.densities;
     int maxDensity = densities[0];
+    struct canonicalCycleShifter *shifterState = createCanonicalCycleShifter(w->s.n);
+
     for (int i = 1; i < n; i++)
     {
         if (densities[i] > maxDensity)
@@ -192,7 +192,12 @@ static void recordWorld(struct World *w)
     }
     for (int i = 1; i <= maxDensity; i++)
     {
-        int64_t hash = cycleHash(densities, i, 0, n);
+        int start = 0;
+        if (w->s.cyclic_equivalence)
+        {
+            start = canonicalCycleShift(shifterState, densities, i);
+        }
+        int64_t hash = cycleHash(densities, i, start, n);
         if (hash == 0)
         {
             break;
@@ -209,6 +214,7 @@ static void recordWorld(struct World *w)
     {
         recordMesh(w);
     }
+    destroyCanonicalCycleShifter(shifterState);
 }
 
 void RunWorld(struct World *w)
@@ -226,7 +232,6 @@ void BeholdWorld(struct World *w)
 {
     struct densityEntry *densities = w->v.density_entries;
     int *cohort_counts = (int *)mem_calloc(sizeof(int), w->s.n);
-    struct canonicalCycleShifter *shifterState = createCanonicalCycleShifter(w->s.n);
 
     w->s.sensitivity = w->v.max_density + 1;
 
@@ -242,14 +247,6 @@ void BeholdWorld(struct World *w)
 
     for (int s = 0; s < w->s.sensitivity; s++)
     {
-
-        /*
-                for (int i = 0; i < w->s.period; i++)
-                {
-                    densities[i].shift = canonicalCycleShift(shifterState, densities[i].v, s + 1);
-                }
-                */
-
         w->v.num_states[s] = ComputeCohorts(cohort_counts, densities, w->s.n, w->s.period, s + 1);
         for (int i = 0; i < w->v.num_states[s]; i++)
         {
@@ -263,7 +260,6 @@ void BeholdWorld(struct World *w)
         }
         reportStatus("Computing states", s, w->s.sensitivity);
     }
-    destroyCanonicalCycleShifter(shifterState);
     free(cohort_counts);
 }
 

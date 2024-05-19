@@ -11,7 +11,7 @@ struct WorldSpec
     int n;
     int period;
     int v;
-    int density;
+    int num_particles;
     int precision;
     int sensitivity;
     int cyclic_equivalence;

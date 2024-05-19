@@ -9,23 +9,15 @@
 
 static void ordainDarkMaterials(struct World *w)
 {
-    for (int j = 0; j < w->num_v; j++)
+    const int particles = w->s.num_particles;
+    const int n = w->s.n;
+    const int v = w->num_v;
+    for (int p = 0; p < particles; p++)
     {
-        const int velocity = j - (w->num_v - 1) / 2;
-
-        for (int i = 0; i < w->s.n; i++)
-        {
-            int nextI = (i + velocity) % w->s.n;
-            const int val = rand() % w->s.density;
-
-            w->cur[j][i] = val;
-            w->v.densities[i] += val;
-
-            if (nextI < 0)
-            {
-                nextI += w->s.n;
-            }
-        }
+        const int j = rand() % v;
+        const int i = rand() % n;
+        w->cur[j][i] += 1;
+        w->v.densities[i] += 1;
     }
 }
 
@@ -37,16 +29,22 @@ void InitWorldSpec(struct WorldSpec *ws, int n, int v, int density, int precisio
     ws->period = period;
     ws->precision = precision;
     ws->v = v;
-    ws->density = density;
+    ws->num_particles = density;
     ws->mesh_size = 1024;
 }
 
 struct World *CreateNeWorld(const struct WorldSpec *ws, int trace)
 {
+    const int min_density = 32;
     struct World *w = mem_calloc(sizeof(struct World), 1);
     const int n = ws->n;
     const int period = n;
-    const int density = ws->density;
+    int density = ws->num_particles / ws->n;
+
+    if (density < min_density)
+    {
+        density = min_density;
+    }
 
     w->s = *ws;
 
@@ -266,7 +264,7 @@ void BeholdWorld(struct World *w)
 void PrintWorld(const struct World *w)
 {
     printf("# n v density precision sensitivity\n");
-    printf("%d %d %d %d %d\n", w->s.n, w->s.v, w->s.density, w->s.precision, w->s.sensitivity);
+    printf("%d %d %d %d %d\n", w->s.n, w->s.v, w->s.num_particles, w->s.precision, w->s.sensitivity);
     printf("# densities %dx%d\n", w->s.period, w->s.n);
     printf("# cohorts %dx%d\n", w->s.sensitivity, w->s.n);
     printf("# probabilities %dx%d\n", w->s.sensitivity, w->s.n);

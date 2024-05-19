@@ -2,7 +2,6 @@
 
 #include <errno.h>
 #include <limits.h>
-#include <math.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +11,7 @@
 #include "../lib/stdio/json.h"
 #include "../lib/stdio/util.h"
 #include "../lib/mem/mem.h"
+#include "../lib/algo/entropies.h"
 
 struct W
 {
@@ -43,46 +43,6 @@ static void outputMesh(int64_t ***meshes, int *buf, int level, int size, const c
 
     Destroy_JSON_Stream(stream);
     fclose(outfile);
-}
-
-/*
-
-    Sum_n -p[i] ln(p[i])
-    Sum_n -c[i]/n ln(c[i]/n)
-    -1/n Sum_n c[i](ln(c[i]) - ln(n))
-    ln(n) - 1/n c[i]ln(c[])
-*/
-static double shannon_entropy(int n, int *states)
-{
-    double c = 0;
-    double nd = 0;
-    for (int i = 0; i < n; i++)
-    {
-        const double s = (double)states[i];
-        nd += s;
-        c += s * log(s);
-    }
-
-    return log(nd) - c / nd;
-}
-
-static double time_jitter(int n, int *probabilities)
-{
-    int jitter = 0;
-    for (int i = 0; i < n; i++)
-    {
-        const int prev = (i == 0) ? n - 1 : i - 1;
-        if (probabilities[i] > probabilities[prev])
-        {
-            jitter++;
-        }
-        else if (probabilities[i] < probabilities[prev])
-        {
-            jitter--;
-        }
-    }
-
-    return (double)jitter / (double)n;
 }
 
 static void jfprintStates(json_stream *restrict stream, int n, int *states)

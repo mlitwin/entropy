@@ -57,7 +57,8 @@ clean:
 .PHONY: world
 
 world: circle
-	./circle -n5000 -v10 -d100000 --outdir=../visualize/src/public/ --outname=world
+	./circle -n5000 -v10 -d100000
+#	./circle -n5000 -v10 -d100000 --outdir=../visualize/src/public/ --outname=world
 #	./circle -n100 -v2 -d2 --outdir=../visualize/src/public/ --outname=world
 
 -include $(OBJDIR)/.depend

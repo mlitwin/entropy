@@ -1,6 +1,7 @@
 #include "world.h"
 #include "../types/matrix.h"
 #include "../algo/cycles.h"
+#include "../algo/entropies.h"
 #include "../stdio/util.h"
 #include "../mem/mem.h"
 
@@ -261,13 +262,26 @@ void BeholdWorld(struct World *w)
     free(cohort_counts);
 }
 
-void PrintWorld(const struct World *w)
+void PrintWorld(struct World *w)
 {
-    printf("# n v density precision sensitivity\n");
-    printf("%d %d %d %d %d\n", w->s.n, w->s.v, w->s.num_particles, w->s.precision, w->s.sensitivity);
-    printf("# densities %dx%d\n", w->s.period, w->s.n);
-    printf("# cohorts %dx%d\n", w->s.sensitivity, w->s.n);
-    printf("# probabilities %dx%d\n", w->s.sensitivity, w->s.n);
+    struct EntropyMeasures entropies;
+
+    double base_entropy = shannon_entropy(w->v.num_states[0], w->v.states[0]);
+
+    max_mean_entropies(&entropies, w->s.n, w->s.sensitivity, w->v.num_states, w->v.states, w->v.probabilities);
+
+    reportStatus(NULL, 0, 0);
+
+    printf("%d %d %d %d %d %f %f %f %f\n",
+           w->s.n,
+           w->s.v,
+           w->s.num_particles,
+           w->s.precision,
+           w->s.sensitivity,
+           base_entropy,
+           entropies.mean_jitter,
+           entropies.mean_shannon,
+           entropies.mean_sensitivity);
 }
 
 #ifdef TEST

@@ -3,11 +3,20 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#define CLEAR_LINE "\33[2K\r"
+
 int reportStatus(const char *step, int i, int n)
 {
 #ifndef TEST
-    printf("\33[2K\r%s: %d/%d", step, i, n);
-    return fflush(stdout);
+    if (step)
+    {
+        fprintf(stderr, CLEAR_LINE "%s: %d/%d", step, i, n);
+    }
+    else
+    {
+        fprintf(stderr, CLEAR_LINE);
+    }
+    return fflush(stderr);
 #else
     return 0;
 #endif

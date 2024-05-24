@@ -53,7 +53,7 @@ void DestroyWorld(struct World *w);
 void RunWorld(struct World *w);
 void BeholdWorld(struct World *w);
 
-void PrintWorld(const struct World *w);
+void PrintWorld(struct World *w);
 
 #ifdef TEST
 void TEST_World();

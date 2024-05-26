@@ -6,7 +6,7 @@
 
 int64_t *NewVector(int64_t capacity)
 {
-    int64_t *vec = mem_malloc((capacity + 2) * sizeof(int64_t));
+    int64_t *vec = mem_calloc((capacity + 2), sizeof(int64_t));
     vec[1] = capacity;
 
     return vec + 2;

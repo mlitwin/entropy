@@ -55,10 +55,6 @@ struct World *CreateNeWorld(const struct WorldSpec *ws, int trace)
     w->v.densities = mem_calloc(n, sizeof(int));
     w->v.max_density = 0;
     w->v.density_entries = mem_calloc(period, sizeof(struct densityEntry));
-    for (int i = 0; i < period; i++)
-    {
-        w->v.density_entries[i].states = NewVector(density);
-    }
 
     if (trace)
     {
@@ -180,7 +176,12 @@ static void recordWorld(struct World *w)
     const int n = w->s.n;
     const int *densities = w->v.densities;
     int maxDensity = densities[0];
-    struct canonicalCycleShifter *shifterState = createCanonicalCycleShifter(w->s.n);
+    struct canonicalCycleShifter *shifterState = NULL;
+
+    if (w->s.cyclic_equivalence)
+    {
+        shifterState = createCanonicalCycleShifter(w->s.n);
+    }
 
     for (int i = 1; i < n; i++)
     {
@@ -189,6 +190,7 @@ static void recordWorld(struct World *w)
             maxDensity = densities[i];
         }
     }
+    w->v.density_entries[w->t].states = NewVector(maxDensity);
     for (int i = 1; i <= maxDensity; i++)
     {
         int start = 0;
@@ -213,7 +215,11 @@ static void recordWorld(struct World *w)
     {
         recordMesh(w);
     }
-    destroyCanonicalCycleShifter(shifterState);
+
+    if (shifterState)
+    {
+        destroyCanonicalCycleShifter(shifterState);
+    }
 }
 
 void RunWorld(struct World *w)
@@ -272,6 +278,7 @@ void PrintWorld(struct World *w)
 
     reportStatus(NULL, 0, 0);
 
+#if 0
     printf("%d %d %d %d %d %f %f %f %f\n",
            w->s.n,
            w->s.v,
@@ -282,6 +289,8 @@ void PrintWorld(struct World *w)
            entropies.mean_jitter,
            entropies.mean_shannon,
            entropies.mean_sensitivity);
+#endif
+    printf("%f %f %f\n", base_entropy, entropies.mean_shannon, entropies.mean_shannon / base_entropy);
 }
 
 #ifdef TEST

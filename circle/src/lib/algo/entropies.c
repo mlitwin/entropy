@@ -71,9 +71,14 @@ void max_mean_entropies(struct EntropyMeasures *oMeasures, int n, int levels, co
         mean_sensitivity += (l + 1) * jitter;
     }
 
+    if (total_jitter > 0)
+    {
+        mean_entropy /= total_jitter;
+        mean_sensitivity /= total_jitter;
+    }
     oMeasures->mean_jitter = total_jitter / levels;
-    oMeasures->mean_shannon = mean_entropy / total_jitter;
-    oMeasures->mean_sensitivity = mean_sensitivity / total_jitter;
+    oMeasures->mean_shannon = mean_entropy;
+    oMeasures->mean_sensitivity = mean_sensitivity;
 }
 
 #ifdef TEST

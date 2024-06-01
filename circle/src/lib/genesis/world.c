@@ -290,7 +290,7 @@ void PrintWorld(struct World *w)
            entropies.mean_shannon,
            entropies.mean_sensitivity);
 #endif
-    printf("%f %f %f\n", base_entropy, entropies.mean_shannon, entropies.mean_shannon / base_entropy);
+    printf("%d %f %f %f\n", w->s.n, base_entropy, entropies.mean_shannon, entropies.mean_shannon / base_entropy);
 }
 
 #ifdef TEST

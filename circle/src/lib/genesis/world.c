@@ -1,5 +1,6 @@
 #include "world.h"
 #include "../types/matrix.h"
+#include "../types/vector.h"
 #include "../algo/cycles.h"
 #include "../algo/entropies.h"
 #include "../stdio/util.h"
@@ -274,7 +275,7 @@ void PrintWorld(struct World *w)
 
     double base_entropy = shannon_entropy(w->v.num_states[0], w->v.states[0]);
 
-    max_mean_entropies(&entropies, w->s.n, w->s.sensitivity, w->v.num_states, w->v.states, w->v.probabilities);
+    max_mean_entropies(&entropies, &w->s, &w->v);
 
     reportStatus(NULL, 0, 0);
 

@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "../lib/types/matrix.h"
+#include "../types/vector.h"
 #include "../lib/stdio/json.h"
 #include "../lib/stdio/util.h"
 #include "../lib/mem/mem.h"

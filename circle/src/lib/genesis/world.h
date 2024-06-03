@@ -1,34 +1,6 @@
 #pragma once
 
-#include <stdint.h>
-
-#include "density_entry.h"
-#include "../types/matrix.h"
-#include "../types/vector.h"
-
-struct WorldSpec
-{
-    int n;
-    int period;
-    int v;
-    int num_particles;
-    int precision;
-    int sensitivity;
-    int cyclic_equivalence;
-    int mesh_size;
-};
-
-struct WorldView
-{
-    int *densities;
-    int max_density;
-    int **probabilities;
-    int64_t ***meshes;
-    int **cohorts;
-    int **states;
-    int *num_states;
-    struct densityEntry *density_entries;
-};
+#include "worlddefs.h"
 
 struct World
 {

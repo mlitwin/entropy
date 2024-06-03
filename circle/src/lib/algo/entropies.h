@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../genesis/worlddefs.h"
+
 double shannon_entropy(int n, const int *states);
 
 struct EntropyMeasures
@@ -10,7 +12,8 @@ struct EntropyMeasures
 };
 
 double time_jitter(int n, const int *probabilities);
-void max_mean_entropies(struct EntropyMeasures *oMeasures, int n, int levels, const int *num_states, int *const *states, int *const *probabilities);
+
+void max_mean_entropies(struct EntropyMeasures *oMeasures, const struct WorldSpec *s, const struct WorldView *v);
 
 #ifdef TEST
 void TEST_Entropies();

@@ -26,12 +26,21 @@ void DestroyMatrix(void **m)
 #include "test.h"
 void TEST_Matrix()
 {
-    int **m = (int **)NewMatrix(sizeof(int), 20, 30);
-    m[4][7] = 22;
-
-    if (m[4][7] != 22)
+    const int v = 45;
+    const int n = 90;
+    int **m = (int **)NewMatrix(sizeof(int), v, n);
+    for (int i = 0; i < v; i++)
     {
-        FAIL("Can't set matrix 22 != %d", m[4][7]);
+        for (int j = 0; j < n; j++)
+        {
+            // m[i][j] += 1;
+        }
+    }
+    m[36][0] = 22;
+
+    if (m[36][0] != 22)
+    {
+        FAIL("Can't set matrix 22 != %d", m[36][0]);
     }
 
     DestroyMatrix((void **)m);

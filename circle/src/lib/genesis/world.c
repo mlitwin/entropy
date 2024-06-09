@@ -37,16 +37,9 @@ void InitWorldSpec(struct WorldSpec *ws, int n, int v, int density, int precisio
 
 struct World *CreateNeWorld(const struct WorldSpec *ws, int trace)
 {
-    const int min_density = 32;
     struct World *w = mem_calloc(sizeof(struct World), 1);
     const int n = ws->n;
     const int period = n;
-    int density = ws->num_particles / ws->n;
-
-    if (density < min_density)
-    {
-        density = min_density;
-    }
 
     w->s = *ws;
 
@@ -111,8 +104,8 @@ static void AdvanceWorld(struct World *w)
     for (int j = 0; j < w->num_v; j++)
     {
         const int *cur_row = w->cur[j];
-        const int velocity = j + 1;
-        const int shift = (w->t * velocity) % w->s.n;
+        const int displacement = (j - w->s.v) * w->t;
+        const int shift = (displacement % w->s.n + w->s.n) % w->s.n;
         const int first_segment_len = w->s.n - shift;
 
         for (int i = 0; i < first_segment_len; i++)
@@ -275,23 +268,11 @@ void PrintWorld(struct World *w)
 
     double base_entropy = shannon_entropy(w->v.num_states[0], w->v.states[0]);
 
-    max_mean_entropies(&entropies, &w->s, &w->v);
+    max_mean_entropies(&entropies, &w->s, &w->v, w->cur);
 
     reportStatus(NULL, 0, 0);
 
-#if 0
-    printf("%d %d %d %d %d %f %f %f %f\n",
-           w->s.n,
-           w->s.v,
-           w->s.num_particles,
-           w->s.precision,
-           w->s.sensitivity,
-           base_entropy,
-           entropies.mean_jitter,
-           entropies.mean_shannon,
-           entropies.mean_sensitivity);
-#endif
-    printf("%d %f %f %f\n", w->s.n, base_entropy, entropies.mean_shannon, entropies.mean_shannon / base_entropy);
+    printf("%d %f %f %f %f\n", w->s.n, base_entropy, entropies.energy, entropies.mean_shannon, entropies.mean_shannon / base_entropy);
 }
 
 #ifdef TEST

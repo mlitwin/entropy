@@ -42,11 +42,23 @@ double time_jitter(int n, const int *probabilities)
     return (double)jitter / (double)n;
 }
 
-void max_mean_entropies(struct EntropyMeasures *oMeasures, const struct WorldSpec *s, const struct WorldView *v)
+static double energy(int n, int v, const int **d)
+{
+    double e = 0;
+    const int num_v = 2 * v + 1;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < num_v; j++)
+        {
+            const double velocity = j - v;
+            e += velocity * velocity;
+        }
+    }
+    return e / 2.0;
+}
 
-// void max_mean_entropies(struct EntropyMeasures *oMeasures, int n, int levels, const int *num_states, int *const *states, int *const *probabilities)
-{ //     max_mean_entropies(&entropies, w->s.n, w->s.sensitivity, w->v.num_states, w->v.states, w->v.probabilities);
-
+void max_mean_entropies(struct EntropyMeasures *oMeasures, const struct WorldSpec *s, const struct WorldView *v, int **d)
+{
     double total_jitter = 0;
 
     double mean_entropy = 0;
@@ -79,6 +91,10 @@ void max_mean_entropies(struct EntropyMeasures *oMeasures, const struct WorldSpe
         mean_entropy /= total_jitter;
         mean_sensitivity /= total_jitter;
     }
+
+    oMeasures->s = *s;
+    oMeasures->energy = energy(s->n, s->v, d);
+    oMeasures->base_shannon = shannon_entropy(v->num_states[0], v->states[0]);
     oMeasures->mean_jitter = total_jitter / s->sensitivity;
     oMeasures->mean_shannon = mean_entropy;
     oMeasures->mean_sensitivity = mean_sensitivity;

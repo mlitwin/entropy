@@ -42,7 +42,7 @@ double time_jitter(int n, const int *probabilities)
     return (double)jitter / (double)n;
 }
 
-static double energy(int n, int v, const int **d)
+static double energy(int n, int v, int **d)
 {
     double e = 0;
     const int num_v = 2 * v + 1;
@@ -67,20 +67,14 @@ void max_mean_entropies(struct EntropyMeasures *oMeasures, const struct WorldSpe
     for (int l = 0; l < s->sensitivity; l++)
     {
         double jitter = time_jitter(s->n, v->probabilities[l]);
-        if (jitter < 0)
-        {
-            jitter = -jitter;
-        }
+        jitter *= jitter;
         total_jitter += jitter;
     }
 
     for (int l = 0; l < s->sensitivity; l++)
     {
         double jitter = time_jitter(s->n, v->probabilities[l]);
-        if (jitter < 0)
-        {
-            jitter = -jitter;
-        }
+        jitter *= jitter;
 
         mean_entropy += shannon_entropy(v->num_states[l], v->states[l]) * jitter;
         mean_sensitivity += (l + 1) * jitter;

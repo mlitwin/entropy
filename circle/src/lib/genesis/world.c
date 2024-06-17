@@ -272,7 +272,13 @@ void PrintWorld(struct World *w)
 
     reportStatus(NULL, 0, 0);
 
-    printf("%d %f %f %f %f\n", w->s.n, base_entropy, entropies.energy, entropies.mean_shannon, entropies.mean_shannon / base_entropy);
+    printf("%d %f %f %f %f %f\n",
+           w->s.n,
+           base_entropy,
+           entropies.energy,
+           entropies.mean_shannon,
+           entropies.mean_shannon / base_entropy,
+           entropies.mean_sensitivity);
 }
 
 #ifdef TEST

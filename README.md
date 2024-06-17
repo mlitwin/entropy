@@ -16,8 +16,8 @@ Analyze the behavior of particles moving in a fixed circle. Take positions, velo
 ### Definitions
 
 $$
-\newcommand{\idiv}{\operatorname{div}}
-\newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\idiv}{\mathbin{div}}
+\newcommand{\sgn}{\mathbin{sgn}}
 $$
 
 - $0 \ldots  {N-1}$ sensor positions

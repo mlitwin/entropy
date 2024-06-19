@@ -15,7 +15,7 @@ Analyze the behavior of particles moving in a fixed circle. Take positions, velo
 
 ### Definitions
 
-- $0 \ldots  {N-1}$ sensor positions
+- $N$ sensor positions \{$0 \ldots  {N-1}\}$, counting the number of particles under the sensor. Sometimes they will have a sensitivity $s$ meaning they need to count $s$ particles before they go up one.
 - Velocities in the range -V to V inclusive
 - Throughout take $t, k, v \in \mathbb{Z}$
 - Write $a \mathbin{div} b$ for integer division $\lfloor \frac{a}{b} \rfloor$
@@ -45,8 +45,10 @@ Let $J_t = $ the number of times state $S_t$ occurs.
 
 Motivation: if you see a transition from a rare state, to a less rare state, to a common state, maybe that means time is moving forward.
 
-Let
+Take
 $$J_s = \sum_k{\mathbin{sgn}(J_{k+1}-J_k)}$$
+
+as a measure of "jitter", which for positive could mean time is moving forward.
 
 # Simulation
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import subprocess
 import random
@@ -6,5 +6,5 @@ import random
 for i in range(1, 1000):
     n = random.randint(100, 1000)
     v = random.randint(0,100)
-    d = random.randint(n, 100*n)
+    d = random.randint(n*100, 10000*n)
     subprocess.run(["./circle", f"-n{n}", f"-v{v}", f"-d{d}"]) 

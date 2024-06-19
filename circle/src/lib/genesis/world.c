@@ -272,8 +272,9 @@ void PrintWorld(struct World *w)
 
     reportStatus(NULL, 0, 0);
 
-    printf("%d %f %f %f %f %f\n",
+    printf("%d %d %f %f %f %f %f\n",
            w->s.n,
+           w->s.num_particles,
            base_entropy,
            entropies.energy,
            entropies.mean_shannon,

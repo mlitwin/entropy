@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+#include <stdio.h>
+
 /*
 
     Sum_n -p[i] ln(p[i])
@@ -64,14 +66,14 @@ void max_mean_entropies(struct EntropyMeasures *oMeasures, const struct WorldSpe
     double mean_entropy = 0;
     double mean_sensitivity = 0;
 
-    for (int l = 0; l < s->sensitivity; l++)
+    for (int l = s->min_sensitivity; l < s->sensitivity; l++)
     {
         double jitter = time_jitter(s->n, v->probabilities[l]);
         jitter *= jitter;
         total_jitter += jitter;
     }
 
-    for (int l = 0; l < s->sensitivity; l++)
+    for (int l = s->min_sensitivity; l < s->sensitivity; l++)
     {
         double jitter = time_jitter(s->n, v->probabilities[l]);
         jitter *= jitter;
@@ -89,7 +91,7 @@ void max_mean_entropies(struct EntropyMeasures *oMeasures, const struct WorldSpe
     oMeasures->s = *s;
     oMeasures->energy = energy(s->n, s->v, d);
     oMeasures->base_shannon = shannon_entropy(v->num_states[0], v->states[0]);
-    oMeasures->mean_jitter = total_jitter / s->sensitivity;
+    oMeasures->mean_jitter = total_jitter / (s->sensitivity - s->min_sensitivity);
     oMeasures->mean_shannon = mean_entropy;
     oMeasures->mean_sensitivity = mean_sensitivity;
 }

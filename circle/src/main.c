@@ -8,7 +8,7 @@
 
 static void usage()
 {
-    printf("Usage: circle -n space -v velocity [-d density] [-p precision]\n");
+    printf("Usage: circle -n space -v max_velocity [-d density_range] [-p precision]\n");
     exit(-1);
 }
 
@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
         {"density_range", required_argument, NULL, 'd'},
         {"precision", required_argument, NULL, 'p'},
         {"cyclic_equivalence", no_argument, &ws.cyclic_equivalence, 3},
+        {"sensitivity", required_argument, NULL, 4},
         {"outdir", required_argument, NULL, 1},
         {"outname", required_argument, NULL, 2},
         {NULL, 0, NULL, 0}};
@@ -53,6 +54,9 @@ int main(int argc, char *argv[])
             break;
         case 2:
             outname = optarg;
+            break;
+        case 4:
+            ws.sensitivity = atoi(optarg);
             break;
         case '?':
         default:;

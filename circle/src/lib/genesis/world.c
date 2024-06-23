@@ -232,7 +232,15 @@ void BeholdWorld(struct World *w)
     struct densityEntry *densities = w->v.density_entries;
     int *cohort_counts = (int *)mem_calloc(sizeof(int), w->s.n);
 
-    w->s.sensitivity = w->v.max_density + 1;
+    if (w->s.sensitivity != 0)
+    {
+        printf("Sensitivity is %d\n", w->s.sensitivity);
+        w->s.min_sensitivity = w->s.sensitivity - 1;
+    }
+    else
+    {
+        w->s.sensitivity = w->v.max_density + 1;
+    }
 
     w->v.cohorts = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
     w->v.probabilities = (int **)NewMatrix(sizeof(int), w->s.sensitivity, w->s.n);
@@ -244,7 +252,7 @@ void BeholdWorld(struct World *w)
         densities[t].t = t;
     }
 
-    for (int s = 0; s < w->s.sensitivity; s++)
+    for (int s = w->s.min_sensitivity; s < w->s.sensitivity; s++)
     {
         w->v.num_states[s] = ComputeCohorts(cohort_counts, densities, w->s.n, w->s.period, s + 1);
         for (int i = 0; i < w->v.num_states[s]; i++)

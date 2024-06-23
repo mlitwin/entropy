@@ -45,10 +45,7 @@ Let $J_t = $ the number of times state $S_t$ occurs.
 
 Motivation: if you see a transition from a rare state, to a less rare state, to a common state, maybe that means time is moving forward.
 
-Take
-$$J_s = \sum_k{\mathbin{sgn}(J_{k+1}-J_k)}$$
-
-as a measure of "jitter", which for positive could mean time is moving forward.
+See [Jitter](./results/Jitter.md)
 
 # Simulation
 
